@@ -3,7 +3,7 @@
   <p>A modern, responsive web application for managing student attendance and performance</p>
 
   <div class="badges">
-    <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python"/>
+    <img src="https://img.shields.io/badge/Python-3.11.9%2B-blue?style=for-the-badge&logo=python"/>
     <img src="https://img.shields.io/badge/Django-4.2-green?style=for-the-badge&logo=django"/>
     <img src="https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge&logo=javascript"/>
     <img src="https://img.shields.io/badge/CSS3-Flexbox-orange?style=for-the-badge&logo=css3"/>
