@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="static/images/logo.png" alt="AMS Logo" width="200"/>
   <h1>🎓 Attendance Management System</h1>
   <p>A modern, responsive web application for managing student attendance and performance</p>
 
