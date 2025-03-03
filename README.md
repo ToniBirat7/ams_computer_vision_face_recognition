@@ -68,10 +68,9 @@ GET /predict-performance/<student_id>/
 ## 🛠 Tech Stack
 
 ### Backend
-- **Framework**: Django 4.2
+- **Framework**: Django 5.0.7
 - **Database**: SQLite3
 - **Authentication**: Django Auth System
-- **API**: Django REST Framework
 - **ML Libraries**: 
   - NumPy
   - Matplotlib
@@ -82,12 +81,10 @@ GET /predict-performance/<student_id>/
 - **CSS**: Custom CSS3 with Flexbox/Grid
 - **Charts**: Chart.js
 - **Icons**: Boxicons
-- **HTTP Client**: Fetch API
 
 ### Development Tools
 - **Version Control**: Git
 - **IDE**: VS Code
-- **API Testing**: Postman
 - **Browser Tools**: Chrome DevTools
 
 ## 🎨 Color Theme & Design
@@ -179,7 +176,7 @@ attendance_system/
 ## 🚀 Installation & Setup
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.11.9+
 - pip (Python package manager)
 - Git
 - Node.js (for frontend development)
@@ -187,8 +184,7 @@ attendance_system/
 ### Setup Steps
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/attendance_system.git
-   cd attendance_system
+   git clone https://github.com/ToniBirat7/AMS_Islington_Project.git .
    ```
 
 2. **Create Virtual Environment**
@@ -202,26 +198,18 @@ attendance_system/
    pip install -r requirements.txt
    ```
 
-4. **Environment Variables**
-   Create a `.env` file in the root directory:
-   ```env
-   DEBUG=True
-   SECRET_KEY=your_secret_key
-   DATABASE_URL=sqlite:///db.sqlite3
-   ```
-
-5. **Database Setup**
+4. **Database Setup**
    ```bash
    python manage.py makemigrations
    python manage.py migrate
    ```
 
-6. **Create Superuser**
+5. **Create Superuser**
    ```bash
    python manage.py createsuperuser
    ```
 
-7. **Run Development Server**
+6. **Run Development Server**
    ```bash
    python manage.py runserver
    ```
@@ -236,16 +224,6 @@ attendance_system/
    - Recent activity logs
 
 2. **Teacher Management**
-   ```javascript
-   // Example of teacher addition
-   async function addTeacher(data) {
-     const response = await fetch('/add-teacher/', {
-       method: 'POST',
-       body: JSON.stringify(data)
-     });
-     return response.json();
-   }
-   ```
 
 3. **Student Management**
    - Bulk student import/export
@@ -260,402 +238,6 @@ attendance_system/
    - Comparative analysis
 
 2. **Performance Prediction**
-   ```python
-   # Example prediction model
-   def predict_performance(attendance_data, exam_scores):
-       features = prepare_features(attendance_data, exam_scores)
-       return model.predict(features)
-   ```
-
-## 📈 Performance Optimization Guide
-
-### Frontend Performance
-
-1. **JavaScript Optimization**
-   ```javascript
-   // Efficient DOM manipulation
-   const fragment = document.createDocumentFragment();
-   students.forEach(student => {
-     const element = createStudentElement(student);
-     fragment.appendChild(element);
-   });
-   container.appendChild(fragment);
-   ```
-
-2. **CSS Best Practices**
-   ```css
-   /* Efficient animations */
-   .card {
-     transform: translateZ(0);
-     will-change: transform;
-     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-   }
-   ```
-
-3. **Asset Optimization**
-   - Image compression
-   - CSS/JS minification
-   - Lazy loading
-   ```html
-   <img loading="lazy" src="large-image.jpg" alt="Lazy loaded image">
-   ```
-
-### Backend Performance
-
-1. **Database Optimization**
-   ```python
-   # Efficient queries
-   from django.db.models import Prefetch
-   
-   students = Student.objects.prefetch_related(
-       Prefetch('attendance_set', queryset=Attendance.objects.select_related('course'))
-   ).select_related('class')
-   ```
-
-2. **Caching Implementation**
-   ```python
-   from django.core.cache import cache
-   
-   def get_student_stats(student_id):
-       cache_key = f'student_stats_{student_id}'
-       stats = cache.get(cache_key)
-       if stats is None:
-           stats = calculate_student_stats(student_id)
-           cache.set(cache_key, stats, timeout=3600)
-       return stats
-   ```
-
-3. **Asynchronous Processing**
-   ```python
-   from asgiref.sync import async_to_sync
-   
-   @async_to_sync
-   async def generate_report(student_id):
-       data = await fetch_student_data(student_id)
-       report = await process_report(data)
-       return report
-   ```
-
-### Security Measures
-
-1. **API Security**
-   ```python
-   from django.views.decorators.http import require_http_methods
-   
-   @require_http_methods(["POST"])
-   @csrf_protect
-   def update_student(request):
-       # Validation and processing
-   ```
-
-2. **Rate Limiting**
-   ```python
-   from django.core.cache import cache
-   
-   def rate_limit(request, key_prefix, limit=100, period=3600):
-       cache_key = f'{key_prefix}_{request.user.id}'
-       count = cache.get(cache_key, 0)
-       if count >= limit:
-           return True
-       cache.set(cache_key, count + 1, period)
-       return False
-   ```
-
-## 🔧 Maintenance & Troubleshooting
-
-### Common Issues
-1. **Database Connections**
-   - Connection pool exhaustion
-   - Timeout handling
-   ```python
-   DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.sqlite3',
-           'NAME': BASE_DIR / 'db.sqlite3',
-           'CONN_MAX_AGE': 60,
-           'OPTIONS': {
-               'timeout': 20,
-           }
-       }
-   }
-   ```
-
-2. **Memory Management**
-   - Cache eviction policies
-   - Large query pagination
-   ```python
-   from django.core.paginator import Paginator
-   
-   def get_large_dataset():
-       queryset = LargeModel.objects.all()
-       paginator = Paginator(queryset, 100)
-       for page in paginator:
-           process_batch(page.object_list)
-   ```
-
-## 📚 Contributing Guidelines
-
-1. **Code Style**
-   - Follow PEP 8 for Python
-   - ESLint for JavaScript
-   - Prettier for formatting
-
-2. **Pull Request Process**
-   - Create feature branch
-   - Write tests
-   - Update documentation
-   - Submit PR with description
-
-3. **Development Workflow**
-   ```bash
-   # Setup development environment
-   make setup-dev
-   
-   # Run tests
-   make test
-   
-   # Check code style
-   make lint
-   ```
 
 ## 📝 License
 MIT License - see LICENSE.md
-
-# Future Development Plans
-
-## Project Optimization Roadmap
-
-### Backend Optimization
-1. **Database Optimization**
-   - Switch to PostgreSQL for better performance
-   - Implement database indexing
-   - Optimize model relationships
-   - Add database connection pooling
-   - Implement query caching
-
-2. **API Development**
-   - Create RESTful API using Django REST Framework
-   - Implement API versioning
-   - Add API documentation using Swagger/OpenAPI
-   - Add rate limiting and throttling
-   - Implement API caching
-
-3. **Performance Improvements**
-   - Add Redis caching layer
-   - Implement Celery for background tasks
-   - Optimize database queries
-   - Add query optimization using select_related/prefetch_related
-   - Implement bulk operations
-
-4. **Testing & CI/CD**
-   - Add unit tests
-   - Implement integration tests
-   - Set up GitHub Actions for CI/CD
-   - Add code coverage reporting
-   - Implement automated deployment
-
-### Frontend Migration to React
-
-1. **Initial Setup**
-   ```bash
-   # Create React project
-   npx create-vite@latest ams-frontend --template react-ts
-   
-   # Install dependencies
-   cd ams-frontend
-   npm install
-   
-   # Add required packages
-   npm install @reduxjs/toolkit react-router-dom axios styled-components
-   ```
-
-2. **Component Structure**
-   ```
-   src/
-   ├── components/
-   │   ├── common/
-   │   │   ├── Button/
-   │   │   ├── Input/
-   │   │   └── Card/
-   │   ├── layout/
-   │   │   ├── Navbar/
-   │   │   └── Sidebar/
-   │   └── features/
-   │       ├── attendance/
-   │       └── profile/
-   ├── pages/
-   ├── services/
-   ├── store/
-   └── utils/
-   ```
-
-3. **State Management**
-   - Implement Redux Toolkit
-   - Create API slices
-   - Handle authentication state
-   - Manage form states
-   - Add real-time updates
-
-4. **Features to Implement**
-   - Real-time attendance tracking
-   - Interactive data visualization
-   - Advanced filtering and sorting
-   - Offline support using Service Workers
-   - Push notifications
-
-### UI/UX Improvements
-
-1. **Message System**
-   ```css
-   .message {
-     position: fixed;
-     top: 20px;
-     right: 20px;
-     padding: 1rem;
-     border-radius: 8px;
-     animation: slideIn 0.3s ease;
-     z-index: 1000;
-   }
-
-   .message-success {
-     background: linear-gradient(135deg, #34D399, #059669);
-     color: white;
-   }
-
-   .message-error {
-     background: linear-gradient(135deg, #EF4444, #DC2626);
-     color: white;
-   }
-
-   .message-warning {
-     background: linear-gradient(135deg, #F59E0B, #D97706);
-     color: white;
-   }
-   ```
-
-2. **Loading States**
-   - Add skeleton loading
-   - Implement smooth transitions
-   - Add progress indicators
-   - Improve error states
-   - Add success animations
-
-### Custom Models Implementation
-
-1. **User Model**
-   ```python
-   from django.contrib.auth.models import AbstractUser
-   
-   class User(AbstractUser):
-       user_type = models.CharField(max_length=20, choices=[
-           ('teacher', 'Teacher'),
-           ('student', 'Student'),
-           ('admin', 'Admin')
-       ])
-       phone = models.CharField(max_length=15)
-       address = models.TextField()
-       profile_image = models.ImageField(upload_to='profiles/')
-   ```
-
-2. **Course Model**
-   ```python
-   class Course(models.Model):
-       code = models.CharField(max_length=10, unique=True)
-       title = models.CharField(max_length=100)
-       description = models.TextField()
-       credits = models.IntegerField()
-       department = models.ForeignKey(Department, on_delete=models.CASCADE)
-       teachers = models.ManyToManyField(Teacher)
-       semester = models.IntegerField()
-   ```
-
-3. **Attendance Model**
-   ```python
-   class Attendance(models.Model):
-       student = models.ForeignKey(Student, on_delete=models.CASCADE)
-       course = models.ForeignKey(Course, on_delete=models.CASCADE)
-       date = models.DateField()
-       status = models.CharField(max_length=10, choices=[
-           ('present', 'Present'),
-           ('absent', 'Absent'),
-           ('late', 'Late')
-       ])
-       marked_by = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True)
-       remarks = models.TextField(blank=True)
-   ```
-
-### Development Timeline
-
-1. **Phase 1: Backend Optimization (2 weeks)**
-   - Database migration
-   - API development
-   - Performance improvements
-
-2. **Phase 2: React Migration (3 weeks)**
-   - Setup and configuration
-   - Component development
-   - State management implementation
-
-3. **Phase 3: UI/UX Updates (2 weeks)**
-   - New message system
-   - Loading states
-   - Animations and transitions
-
-4. **Phase 4: Custom Models (1 week)**
-   - Model implementation
-   - Data migration
-   - Testing and validation
-
-### Getting Started with Development
-
-1. Clone the development branch:
-   ```bash
-   git clone -b develop https://github.com/yourusername/ams.git
-   cd ams
-   ```
-
-2. Create and activate virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate     # Windows
-   ```
-
-3. Install dependencies:
-   ```bash
-   pip install -r requirements-dev.txt
-   ```
-
-4. Run migrations:
-   ```bash
-   python manage.py migrate
-   ```
-
-5. Start development server:
-   ```bash
-   python manage.py runserver
-   ```
-
-### Contributing Guidelines
-
-1. Create a feature branch:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. Follow coding standards:
-   - Use PEP 8 for Python code
-   - Follow React best practices
-   - Write meaningful commit messages
-
-3. Test your changes:
-   ```bash
-   python manage.py test
-   npm run test  # for React
-   ```
-
-4. Submit a pull request with:
-   - Clear description of changes
-   - Screenshots if applicable
-   - Test results
-   - Documentation updates
