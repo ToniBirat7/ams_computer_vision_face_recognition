@@ -1,3 +1,5 @@
+import io
+import numpy as np
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -12,8 +14,6 @@ from django.db.models.functions import TruncMonth
 from datetime import datetime, timedelta
 from django.db.models import Q
 import matplotlib.pyplot as plt
-import numpy as np
-import io
 import base64
 from sklearn.ensemble import RandomForestClassifier
 import json
@@ -52,7 +52,7 @@ def login_page(request):
 @login_required
 def admin_view(request):
     teachers = Teacher.objects.select_related('user').all()
-    students = Student.objects.all().order_by('-id')
+    students = Student.objects.order_by('-id')[:5]
     courses = Course.objects.select_related('teacher', 'teacher__user').all()
     
     context = {
