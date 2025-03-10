@@ -1,0 +1,85 @@
+{% extends 'auth/admin.html' %}
+{% load static %}
+
+{% block title %}AMS | Teacher Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'admin/teacher_details.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="details-container">
+    <!-- Back Button -->
+    <div class="back-button-container">
+        <a href="{% url 'list-teachers' %}" class="back-button">
+            <i class='bx bx-arrow-back'></i>
+            Back to Teachers List
+        </a>
+    </div>
+
+    <!-- Teacher Profile Section -->
+    <div class="profile-section">
+        <div class="profile-header">
+            {% if teacher.image %}
+            <div class="teacher-avatar">
+                <img src="{{ teacher.image.url }}" alt="{{ teacher.user.get_full_name }}">
+            </div>
+            {% else %}
+            <div class="teacher-avatar no-image">
+                <i class='bx bx-user-circle'></i>
+            </div>
+            {% endif %}
+            <div class="profile-info">
+                <h1>{{ teacher.user.get_full_name }}</h1>
+                <p><i class='bx bx-map'></i>{{ teacher.address }}</p>
+                <p><i class='bx bx-phone'></i>{{ teacher.primary_number }}</p>
+                <p><i class='bx bx-calendar'></i>DOB: {{ teacher.dob|date:"M d, Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Overview Section -->
+    <div class="courses-section">
+        <h2>Courses Overview</h2>
+        <div class="courses-grid">
+            {% for course in courses %}
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>{{ course.title }}</h3>
+                    <span class="course-code">{{ course.code }}</span>
+                </div>
+                <div class="course-stats">
+                    <div class="stat-item">
+                        <i class='bx bxs-user-detail'></i>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ course.student_count }}</span>
+                            <span class="stat-label">Students</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class='bx bxs-calendar-check'></i>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ course.attendance_count }}</span>
+                            <span class="stat-label">Attendance Records</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-attendance">
+                    <h4>Attendance Overview</h4>
+                    <div class="attendance-bar">
+                        <div class="progress" style="width: {{ course.attendance_percentage }}%">
+                            <span>{{ course.attendance_percentage }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <i class='bx bx-book-open'></i>
+                <p>No courses assigned yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

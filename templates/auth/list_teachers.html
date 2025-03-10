@@ -46,11 +46,17 @@
         </div>
       </div>
       <div class="item-actions">
-        <button class="edit-btn" data-id="{{ teacher.id }}">
-          <i class='bx bx-edit-alt'></i>
-        </button>
-        <button class="delete-btn" data-id="{{ teacher.id }}">
-          <i class='bx bx-trash'></i>
+        <div class="edit-delete-actions">
+          <button class="edit-btn" data-id="{{ teacher.id }}">
+            <i class='bx bx-edit-alt'></i>
+          </button>
+          <button class="delete-btn" data-id="{{ teacher.id }}">
+            <i class='bx bx-trash'></i>
+          </button>
+        </div>
+        <button class="view-details-btn" onclick="window.location.href='{% url 'teacher-details' teacher.id %}'">
+          <i class='bx bx-show'></i>
+          View Details
         </button>
       </div>
     </div>

@@ -636,3 +636,42 @@ def predict_performance(request, student_id):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def teacher_details(request, teacher_id):
+    teacher = get_object_or_404(Teacher.objects.select_related('user'), id=teacher_id)
+    
+    # Get all courses taught by the teacher
+    courses = Course.objects.filter(teacher=teacher)
+    
+    # Prepare course data with statistics
+    course_data = []
+    for course in courses:
+        # Get student count for this course
+        student_count = StudentClass.objects.filter(course=course).count()
+        
+        # Get attendance statistics
+        attendance_records = Attendance.objects.filter(course=course)
+        attendance_count = attendance_records.count()
+        present_count = attendance_records.filter(stats='P').count()
+        
+        # Calculate attendance percentage
+        attendance_percentage = (
+            (present_count / attendance_count * 100) 
+            if attendance_count > 0 else 0
+        )
+        
+        course_data.append({
+            'title': course.title,
+            'code': course.id,
+            'student_count': student_count,
+            'attendance_count': attendance_count,
+            'attendance_percentage': round(attendance_percentage, 1)
+        })
+    
+    context = {
+        'teacher': teacher,
+        'courses': course_data,
+    }
+    
+    return render(request, 'auth/teacher_details.html', context)
