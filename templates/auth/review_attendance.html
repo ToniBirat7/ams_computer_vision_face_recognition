@@ -1,0 +1,61 @@
+{% extends 'auth/admin.html' %}
+{% load static %}
+
+{% block title %}AMS | Review Attendance{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'admin/review_attendance.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="review-container">
+    <header class="review-header">
+        <h1>Review Attendance</h1>
+        <div class="filter-section">
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchInput" placeholder="Search by course...">
+            </div>
+            <div class="date-filter">
+                <input type="date" id="dateFilter">
+            </div>
+        </div>
+    </header>
+
+    <div class="attendance-table">
+        {% for attendance in attendances %}
+        <div class="attendance-row" data-course="{{ attendance.course.title|lower }}">
+            <div class="row-main">
+                <div class="attendance-id">#{{ attendance.id }}</div>
+                <div class="course-info">
+                    <h3>{{ attendance.course.title }}</h3>
+                    <span class="teacher-name">{{ attendance.student.name }}</span>
+                </div>
+                <div class="attendance-date">{{ attendance.today_date|date:"M d, Y" }}</div>
+                <div class="attendance-stats">
+                    <span class="stat-item">
+                        <i class='bx bxs-user-check'></i>{{ attendance.present_count }}
+                    </span>
+                    <span class="stat-item">
+                        <i class='bx bxs-user-x'></i>{{ attendance.absent_count }}
+                    </span>
+                </div>
+                <button class="alter-btn" onclick="window.location.href='{% url 'alter-attendance' attendance.id %}'">
+                    <i class='bx bx-edit-alt'></i>
+                    Alter
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class='bx bx-calendar-x'></i>
+            <p>No attendance records found</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'admin/review_attendance.js' %}"></script>
+{% endblock %}

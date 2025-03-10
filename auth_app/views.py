@@ -1,29 +1,44 @@
+# Python Standard Library
 import io
+import json
+import pickle
+from datetime import datetime, timedelta
+from pathlib import Path
+
+# Third Party Imports
 import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Django Imports
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.contrib.auth.models import User
-from .forms import LoginForm, UserRegistrationForm, TeacherForm, StudentForm, CourseForm, StudentClassForm
-from .models import Teacher, Student, Course, StudentClass, Attendance
+from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
-from datetime import datetime, timedelta
-from django.db.models import Q
-import matplotlib.pyplot as plt
-import base64
-from sklearn.ensemble import RandomForestClassifier
-import json
-import matplotlib
-import pickle
-from pathlib import Path
-import pandas as pd
-import random
-from scipy import stats  # Add this import
-matplotlib.use('Agg')
+
+# Local Imports
+from .forms import ( 
+    UserRegistrationForm, 
+    TeacherForm, 
+    StudentForm, 
+    CourseForm, 
+    StudentClassForm
+)
+from .models import (
+    Teacher,
+    Student, 
+    Course, 
+    StudentClass, 
+    Attendance
+)
 
 def login_page(request):
     next = request.GET.get('next')
@@ -675,3 +690,55 @@ def teacher_details(request, teacher_id):
     }
     
     return render(request, 'auth/teacher_details.html', context)
+
+@login_required
+def review_attendance(request):
+    # Get all attendance records with related course and teacher info
+    attendances = Attendance.objects.select_related(
+        'course', 
+        'course__teacher', 
+        'course__teacher__user'
+    ).order_by('-today_date')
+
+    # Add present and absent counts for each attendance
+    for attendance in attendances:
+        attendance.present_count = attendance.stats.count('P')
+        attendance.absent_count = attendance.stats.count('A')
+
+    context = {
+        'attendances': attendances
+    }
+    
+    return render(request, 'auth/review_attendance.html', context)
+
+@login_required
+def alter_attendance(request, attendance_id):
+    attendance = get_object_or_404(Attendance, id=attendance_id)
+    student_classes = StudentClass.objects.filter(course=attendance.course)
+    
+    if request.method == 'POST':
+        # Get the updated attendance data
+        attendance_data = json.loads(request.body)
+        new_stats = attendance_data.get('stats', '')
+        
+        # Update the attendance
+        attendance.stats = new_stats
+        attendance.save()
+        
+        return JsonResponse({'message': 'Attendance updated successfully'})
+    
+    # Get the current attendance status for each student
+    students_attendance = []
+    for idx, student_class in enumerate(student_classes):
+        students_attendance.append({
+            'student_id': student_class.student.id,
+            'name': student_class.student.name,
+            'status': attendance.stats[idx] if idx < len(attendance.stats) else 'A'
+        })
+    
+    context = {
+        'attendance': attendance,
+        'students_attendance': students_attendance
+    }
+    
+    return render(request, 'auth/alter_attendance.html', context)

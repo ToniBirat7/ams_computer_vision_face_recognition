@@ -1,0 +1,65 @@
+{% extends 'auth/admin.html' %}
+{% load static %}
+
+{% block title %}AMS | Alter Attendance{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'admin/alter_attendance.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="alter-container">
+    <div class="alter-header">
+        <a href="{% url 'review-attendance' %}" class="back-btn">
+            <i class='bx bx-arrow-back'></i>
+            Back to Review
+        </a>
+        <div class="attendance-info">
+            <h1>Alter Attendance</h1>
+            <div class="info-details">
+                <span class="course-name">{{ attendance.course.title }}</span>
+                <span class="attendance-date">{{ attendance.today_date|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="students-list">
+        {% for student in students_attendance %}
+        <div class="student-row">
+            <div class="student-info">
+                <h3>{{ student.name }}</h3>
+                <span class="student-id">#{{ student.student_id }}</span>
+            </div>
+            <div class="attendance-toggle">
+                <button class="toggle-btn {% if student.status == 'P' %}active{% endif %}" 
+                        data-status="P" 
+                        data-student-id="{{ student.student_id }}">
+                    <i class='bx bxs-user-check'></i>
+                    Present
+                </button>
+                <button class="toggle-btn {% if student.status == 'A' %}active{% endif %}" 
+                        data-status="A" 
+                        data-student-id="{{ student.student_id }}">
+                    <i class='bx bxs-user-x'></i>
+                    Absent
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="action-buttons">
+        <button class="save-btn" id="saveChanges">
+            <i class='bx bx-save'></i>
+            Save Changes
+        </button>
+    </div>
+</div>
+
+<!-- Message Container -->
+<div class="message-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'admin/alter_attendance.js' %}"></script>
+{% endblock %} 

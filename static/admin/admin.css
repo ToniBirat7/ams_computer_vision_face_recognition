@@ -279,11 +279,6 @@ body {
   gap: 2rem;
 }
 
-/* Navigation Sections */
-.nav-section {
-  margin-bottom: 2rem;
-}
-
 .nav-section h3 {
   color: var(--text-secondary);
   font-size: 0.8rem;
@@ -377,7 +372,7 @@ body {
 
 .sidebar.collapsed .sidebar-toggle {
   right: 0.75rem;
-  top: 55%;
+  top: 53%;
 }
 
 .sidebar.collapsed .sidebar-header h2,
@@ -1054,7 +1049,7 @@ body {
   }
 
   .section-header .add-btn {
-  width: 100%;
+    width: 100%;
     justify-content: center;
   }
 }
