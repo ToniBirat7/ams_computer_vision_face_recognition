@@ -1,6 +1,7 @@
 # Python Standard Library
 import io
 import json
+import base64
 import pickle
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -486,7 +487,10 @@ def predict_performance(request, student_id):
             print("Model loaded successfully")
         except Exception as e:
             print(f"Error loading model: {str(e)}")
-            return JsonResponse({'error': 'Error loading prediction model'}, status=500)
+            return JsonResponse({
+                'error': 'Error loading prediction model',
+                'details': str(e)
+            }, status=500)
 
         # Parse the JSON data from request body
         data = json.loads(request.body)
@@ -622,15 +626,22 @@ def predict_performance(request, student_id):
         plt.tight_layout()
 
         # Save plot to buffer
-        buffer = io.BytesIO()
-        plt.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
-        buffer.seek(0)
-        image_png = buffer.getvalue()
-        buffer.close()
-        plt.close()
+        try:
+            buffer = io.BytesIO()
+            plt.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
+            buffer.seek(0)
+            image_png = buffer.getvalue()
+            buffer.close()
+            plt.close()
 
-        # Encode the image
-        graphic = base64.b64encode(image_png).decode('utf-8')
+            # Encode the image
+            graphic = base64.b64encode(image_png).decode('utf-8')
+        except Exception as e:
+            print(f"Error generating plot: {str(e)}")
+            return JsonResponse({
+                'error': 'Error generating prediction visualization',
+                'details': str(e)
+            }, status=500)
 
         # Prepare response data
         response_data = {
@@ -650,7 +661,10 @@ def predict_performance(request, student_id):
         print(f"Error in predict_performance: {str(e)}")
         import traceback
         traceback.print_exc()
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({
+            'error': 'An unexpected error occurred',
+            'details': str(e)
+        }, status=500)
 
 @login_required
 def teacher_details(request, teacher_id):
