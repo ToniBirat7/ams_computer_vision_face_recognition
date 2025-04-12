@@ -26,14 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Close mobile menu when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.nav-links') && !e.target.closest('.mobile-menu-btn')) {
-      navLinks.classList.remove('active');
-      menuBtn.querySelector('i').classList.add('bx-menu');
-      menuBtn.querySelector('i').classList.remove('bx-x');
-    }
-  });
+  // // Close mobile menu when clicking outside
+  // document.addEventListener('click', (e) => {
+  //   if (!e.target.closest('.nav-links') && !e.target.closest('.mobile-menu-btn')) {
+  //     navLinks.classList.remove('active');
+  //     menuBtn.querySelector('i').classList.add('bx-menu');
+  //     menuBtn.querySelector('i').classList.remove('bx-x');
+  //   }
+  // });
 
   // Auto-dismiss messages
   const messages = document.querySelectorAll('.message');

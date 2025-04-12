@@ -61,9 +61,6 @@ class VideoAttendanceConsumer(AsyncWebsocketConsumer):
                         # Try to find the student in the database
                         try:
                             curr_courseid = self.course_id
-                            # Send real stu for virat kholi
-                            if name == "Virat Kohli":
-                                name = "Birat Gautam"
 
                             student = await self.get_student(name, curr_courseid)
                             print("The course id in process frame is ", self.course_id)

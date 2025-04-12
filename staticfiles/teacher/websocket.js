@@ -10,7 +10,7 @@ class VideoAttendance {
         this.detectedStudents = new Set();
         
         this.setupEventListeners();
-        this.setupWebSocket();
+        // this.setupWebSocket();
 
         // Absent Present Counter
         this.totalStudents = document.querySelectorAll('.student-row').length;
@@ -56,35 +56,64 @@ class VideoAttendance {
                 console.error('WebSocket readyState:', this.ws.readyState);
                 this.updateStatus('Connection error', 'error');
             };
-
             this.ws.onclose = (event) => {
-                console.log('WebSocket closed with code:', event.code, 'reason:', event.reason);
-                console.log('WebSocket readyState:', this.ws.readyState);
+                if (this.ws) {
+                    console.log('WebSocket closed with code:', event.code, 'reason:', event.reason);
+                    console.log('WebSocket readyState:', this.ws.readyState);
+                }
                 this.updateStatus('Disconnected', 'error');
+                this.ws = null;
             };
         } catch (error) {
             console.error('Error creating WebSocket:', error);
         }
     }
 
+    // startVideoAttendance() {
+    //     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+    //         // Show video container
+    //         this.videoContainer.classList.remove('hidden');
+    //         this.startBtn.disabled = true;
+
+    //         const segments = window.location.pathname.split('/').filter(Boolean);
+    //         const courseId = segments[segments.length - 1]; // This gives '2'
+    //         console.log(`The course Id is ${courseId}`);
+
+    //         // Request backend to start streaming
+    //         this.ws.send(JSON.stringify({
+    //             type: 'start_stream',
+    //             courseid: courseId
+    //         }));
+    //     } else {
+    //         this.updateStatus('Not connected to server', 'error');
+    //     }
+    // }
+
     startVideoAttendance() {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            // Show video container
-            this.videoContainer.classList.remove('hidden');
-            this.startBtn.disabled = true;
-
-            const segments = window.location.pathname.split('/').filter(Boolean);
-            const courseId = segments[segments.length - 1]; // This gives '2'
-            console.log(`The course Id is ${courseId}`);
-
-            // Request backend to start streaming
-            this.ws.send(JSON.stringify({
-                type: 'start_stream',
-                courseid: courseId
-            }));
-        } else {
-            this.updateStatus('Not connected to server', 'error');
+        if (!this.ws || this.ws.readyState === WebSocket.CLOSED) {
+            this.setupWebSocket();
         }
+
+        const waitForOpen = () => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                // Show video container
+                this.videoContainer.classList.remove('hidden');
+                this.startBtn.disabled = true;
+
+                const segments = window.location.pathname.split('/').filter(Boolean);
+                const courseId = segments[segments.length - 1];
+                console.log(`The course Id is ${courseId}`);
+
+                this.ws.send(JSON.stringify({
+                    type: 'start_stream',
+                    courseid: courseId
+                }));
+            } else {
+                setTimeout(waitForOpen, 100); // Keep retrying until WebSocket is open
+            }
+        };
+
+        waitForOpen();
     }
 
     handleWebSocketMessage(data) {
@@ -104,7 +133,7 @@ class VideoAttendance {
             this.video.src = data.frame;
         }
         else if (data.type === 'error') {
-            this.updateStatus(Error: ${data.message}, 'error');
+            this.updateStatus(data.message, 'error');
         }
         else {
             console.log(`We are left with type : ${data.type}`)
@@ -116,11 +145,11 @@ class VideoAttendance {
         if (!this.detectedStudents.has(id)) {
             this.detectedStudents.add(id);
             
-            // Update the UI
-            const studentElement = document.createElement('div');
-            studentElement.className = 'detected-student';
-            studentElement.textContent = id;
-            this.detectedList.appendChild(studentElement);
+            // // Update the UI
+            // const studentElement = document.createElement('div');
+            // studentElement.className = 'detected-student';
+            // studentElement.textContent = id;
+            // this.detectedList.appendChild(studentElement);
 
             // Mark the student as present in the attendance form
             const studentRow = document.querySelector(`[data-student-id="${id}"]`);
