@@ -25,19 +25,8 @@ predict_transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-# Open video capture (0 for webcam)
-cap = cv2.VideoCapture(0)
-
-if not cap.isOpened():
-    print("Error: Could not open video stream.")
-    exit()
-
 # Video capture loop
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
-
+def take_face(frame):
     # Convert frame to PIL Image for face detection
     image_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
@@ -48,7 +37,7 @@ while True:
         for box in boxes:
             # Extract the coordinates of the bounding box
             x1, y1, x2, y2 = box
-            x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])  # Convert coordinates to integers
+            x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
 
             # Crop the face from the image
             face = image_pil.crop((x1, y1, x2, y2))
@@ -71,25 +60,12 @@ while True:
                     best_match = name
 
             # Set similarity threshold
-            SIMILARITY_THRESHOLD = 0.8  # You can adjust this (try 0.5 to 0.7 range)
+            SIMILARITY_THRESHOLD = 0.8
 
-            # Display result on frame
+            # Return result
             if max_similarity >= SIMILARITY_THRESHOLD:
-                label = f"{best_match}: {max_similarity:.4f}"
+                return f"{best_match}: {max_similarity}"
             else:
-                label = f"Unknown: {max_similarity:.4f}" 
+                return f"Unknown: {max_similarity}"
 
-            # Draw the bounding box and label
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-
-    # Display the video frame
-    cv2.imshow('Face Recognition', frame)
-
-    # Exit condition (press 'q' to quit)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release resources
-cap.release()
-cv2.destroyAllWindows()
+    return None  # Return None if no face is detected

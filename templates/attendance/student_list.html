@@ -27,6 +27,35 @@
         </div>
     </header>
 
+    <!-- Video Attendance Section -->
+    <div class="video-attendance-section">
+        <button id="startVideoBtn" class="btn btn-primary">
+            <i class="ri-camera-line"></i>
+            Start Video Attendance
+        </button>
+
+        <!-- Video Feed Container (Initially Hidden) -->
+        <div id="videoFeedContainer" class="video-feed-container hidden">
+            <div class="video-header">
+                <h3>Face Recognition Attendance</h3>
+                <button id="closeVideoBtn" class="btn btn-danger">
+                    <i class="ri-close-line"></i>
+                    Close Attendance
+                </button>
+            </div>
+            <div class="video-content">
+                <img id="videoElement" alt="Video Feed" style="width: 100%; height: auto;">
+                <div class="recognition-status">
+                    <span id="statusText">Initializing camera...</span>
+                </div>
+            </div>
+            <div class="detection-list">
+                <h4>Detected Students</h4>
+                <div id="detectedStudents" class="detected-students-list"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Attendance Form -->
     <form method="POST" class="attendance-form">
         {% csrf_token %}
@@ -120,4 +149,5 @@
 
 {% block scripts %}
 <script src="{% static 'teacher/attendance.js' %}"></script>
+<script src="{% static 'teacher/websocket.js' %}"></script>
 {% endblock %}

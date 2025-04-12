@@ -1,0 +1,517 @@
+/* Report Section Styles */
+.report-section {
+  padding: 2rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+}
+
+/* Search Container */
+.search-container {
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 1rem;
+}
+
+.search-input {
+  flex: 1;
+  position: relative;
+}
+
+.search-input i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.search-input input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: var(--background);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input input:focus {
+  border-color: var(--secondary);
+  outline: none;
+}
+
+.search-btn {
+  padding: 1rem 2rem;
+  background: var(--secondary);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* Student Details */
+.student-details {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+}
+
+.student-details.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-image i {
+  font-size: 3rem;
+  color: var(--white);
+}
+
+.profile-info h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.profile-info p {
+  color: var(--text-secondary);
+}
+
+/* Progress Grid */
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.course-card {
+  background: var(--background);
+  padding: 1.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Attendance Stats */
+.attendance-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-item {
+  background: var(--background);
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-item i {
+  font-size: 2rem;
+}
+
+.stat-item.present i {
+  color: var(--success);
+}
+
+.stat-item.absent i {
+  color: var(--error);
+}
+
+.stat-item.percentage i {
+  color: var(--secondary);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Chart Container */
+.attendance-chart {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.attendance-chart h3 {
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-form {
+    flex-direction: column;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .attendance-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .report-section {
+    padding: 1rem;
+  }
+}
+
+/* Prediction Section */
+.prediction-section {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.predict-btn {
+  margin: 1rem 0;
+  padding: 1rem 2.5rem;
+  background: var(--secondary);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 164, 189, 0.2);
+}
+
+.predict-btn:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 59, 92, 0.2);
+}
+
+.predict-btn i {
+  font-size: 1.25rem;
+}
+
+/* Prediction Result Container */
+.prediction-result {
+  margin-top: 2rem;
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.prediction-result.hidden {
+  display: none;
+}
+
+.prediction-result.slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+.prediction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.grade-badge {
+  background: var(--primary);
+  color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.prediction-details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.prediction-chart {
+  width: 100%;
+  max-height: 500px;
+  overflow: hidden;
+  background: var(--background);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.prediction-chart img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-height: 450px;
+}
+
+.prediction-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stat-card {
+  background: var(--background);
+  padding: 1.25rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card h4 {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.stat-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.stat-card li {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.stat-card li span {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.prediction-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.download-btn,
+.close-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.download-btn {
+  background: var(--success);
+  color: var(--white);
+}
+
+.close-btn {
+  background: var(--error);
+  color: var(--white);
+}
+
+.download-btn:hover,
+.close-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Animation Classes */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+/* Responsive Design */
+@media (min-width: 992px) {
+  .prediction-details {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Add smooth scrolling to the page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add container max-width to prevent extreme stretching */
+.prediction-section,
+.attendance-overview,
+.progress-grid {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ensure content doesn't overflow horizontally */
+.main-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Add spacing between sections */
+.attendance-overview,
+.progress-grid,
+.attendance-chart {
+  margin-bottom: 2.5rem;
+}
+
+/* Add these styles to your existing student_report.css */
+
+.grade-selection {
+  margin-bottom: 2rem;
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.grade-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 300px;
+}
+
+.grade-input label {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.grade-dropdown {
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(0, 59, 92, 0.1);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23003b5c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+}
+
+.grade-dropdown:hover {
+  border-color: var(--secondary);
+}
+
+.grade-dropdown:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(0, 164, 189, 0.1);
+}
+
+.grade-dropdown option {
+  padding: 0.75rem;
+  color: var(--text-primary);
+}
+
+/* Add hover effect for options */
+.grade-dropdown option:hover {
+  background-color: var(--secondary);
+  color: var(--white);
+}
+
+/* Style for selected option */
+.grade-dropdown option:checked {
+  background-color: var(--secondary);
+  color: var(--white);
+}

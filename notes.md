@@ -6,6 +6,8 @@ For this we will establish a web socket connection when the user clicks start vi
 
 For each predicted label, the present should ticked automatically as in the previous implementation of the student_list.html. Also, there should be another button appear after displaying the video frame component i.e. close attendance. Once the user clicks this button the video frame should disappear from the UI and then rest of the students who are not detected or labled from the prediction are to be ticked as absent in the UI. Then finally user clicks save attendance then only we will submit the data and save in the database. 
 
+`daphne -b 127.0.0.1 -p 8000 AMS.asgi:application`
+
 1. UI Modifications (student_list.html):
    - Add "Start Video Attendance" button
    - Create video feed component (initially hidden)
