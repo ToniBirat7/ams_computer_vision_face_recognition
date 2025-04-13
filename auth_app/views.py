@@ -728,12 +728,20 @@ def review_attendance(request):
 @login_required
 def alter_attendance(request, attendance_id):
     attendance = get_object_or_404(Attendance, id=attendance_id)
+    print("Attendance Obj")
+    print(attendance)
+    print(attendance.course.title)
+    print(attendance.stats)
     student_classes = StudentClass.objects.filter(course=attendance.course)
     
     if request.method == 'POST':
         # Get the updated attendance data
         attendance_data = json.loads(request.body)
         new_stats = attendance_data.get('stats', '')
+
+        print("Post", request.body)
+
+        print("Attendance Status", attendance_data)
         
         # Update the attendance
         attendance.stats = new_stats
@@ -741,18 +749,8 @@ def alter_attendance(request, attendance_id):
         
         return JsonResponse({'message': 'Attendance updated successfully'})
     
-    # Get the current attendance status for each student
-    students_attendance = []
-    for idx, student_class in enumerate(student_classes):
-        students_attendance.append({
-            'student_id': student_class.student.id,
-            'name': student_class.student.name,
-            'status': attendance.stats[idx] if idx < len(attendance.stats) else 'A'
-        })
-    
     context = {
         'attendance': attendance,
-        'students_attendance': students_attendance
     }
     
     return render(request, 'auth/alter_attendance.html', context)

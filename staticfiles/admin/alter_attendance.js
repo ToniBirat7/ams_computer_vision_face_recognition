@@ -20,12 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle save changes
     saveButton.addEventListener('click', async function() {
+        const presentBtn = document.querySelector('.toggle-btn[data-status="P"]')
+        stat = presentBtn.classList.contains('active') ? 'P' : 'A';
         const attendanceData = {
-            stats: Array.from(document.querySelectorAll('.student-row')).map(row => {
-                const presentBtn = row.querySelector('.toggle-btn[data-status="P"]');
-                return presentBtn.classList.contains('active') ? 'P' : 'A';
-            }).join('')
-        };
+            stats: stat
+            }
 
         try {
             const response = await fetch(`/alter-attendance/${attendanceId}/`, {

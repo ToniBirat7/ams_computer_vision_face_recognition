@@ -24,28 +24,24 @@
     </div>
 
     <div class="students-list">
-        {% for student in students_attendance %}
         <div class="student-row">
             <div class="student-info">
-                <h3>{{ student.name }}</h3>
-                <span class="student-id">#{{ student.student_id }}</span>
+                <h3>{{ attendance.student.name }}</h3>
+                <span class="student-id">#{{ attendance.student.id }}</span>
             </div>
             <div class="attendance-toggle">
-                <button class="toggle-btn {% if student.status == 'P' %}active{% endif %}" 
-                        data-status="P" 
-                        data-student-id="{{ student.student_id }}">
+                <button class="toggle-btn {% if attendance.stats == 'P' %}active{% endif %}" data-status="P"
+                    data-student-id="{{ attendance.student.id }}">
                     <i class='bx bxs-user-check'></i>
                     Present
                 </button>
-                <button class="toggle-btn {% if student.status == 'A' %}active{% endif %}" 
-                        data-status="A" 
-                        data-student-id="{{ student.student_id }}">
+                <button class="toggle-btn {% if attendance.stats == 'A' %}active{% endif %}" data-status="A"
+                    data-student-id="{{ attendance.student.idd }}">
                     <i class='bx bxs-user-x'></i>
                     Absent
                 </button>
             </div>
         </div>
-        {% endfor %}
     </div>
 
     <div class="action-buttons">
@@ -62,4 +58,4 @@
 
 {% block extra_js %}
 <script src="{% static 'admin/alter_attendance.js' %}"></script>
-{% endblock %} 
+{% endblock %}
