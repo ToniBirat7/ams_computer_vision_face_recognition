@@ -20,6 +20,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AMS.settings')
 # Initialize Django
 django.setup()
 
+# Import after django.setup()
+from auth_app.routing import websocket_urlpatterns
+
 # Initialize Django ASGI application early to ensure the AppRegistry
 # is populated before importing code that may import ORM models.
 django_asgi_app = get_asgi_application()
