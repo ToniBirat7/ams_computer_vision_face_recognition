@@ -11,7 +11,7 @@ class VideoAttendance {
         
         this.setupEventListeners();
         // this.setupWebSocket();
-
+        
         // Absent Present Counter
         this.totalStudents = document.querySelectorAll('.student-row').length;
         this.presentCounter = document.getElementById('presentCount').querySelector('h3');
