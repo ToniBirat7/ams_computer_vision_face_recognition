@@ -18,7 +18,7 @@ if __name__ == "__main__":
     transform_train = transforms.Compose([
         transforms.Resize((160, 160)),
         transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10),
+        transforms.RandomRotation(15),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
         transforms.ToTensor()
     ])
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             print(f"[ERROR] Failed on image index {idx} | {e}")
 
     # Save embeddings
-    with open('known_face_embeddings.pkl', 'wb') as f:
+    with open('known_face_embeddings_hridesh_added.pkl', 'wb') as f:
         pickle.dump(known_face_embeddings, f)
 
     print(f"[SUCCESS] Saved {len(known_face_embeddings)} face embeddings to 'known_face_embeddings.pkl'")

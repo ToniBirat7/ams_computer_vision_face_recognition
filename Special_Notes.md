@@ -30,6 +30,7 @@ students_data = [
     {"name": "Hrithik Roshan", "address": "Andheri West, Mumbai", "age": 29, "phone_number": "9876543214"},
     {"name": "Priyanka Chopra", "address": "Bandra, Mumbai", "age": 28, "phone_number": "9876543215"},
     {"name": "Virat Kohli", "address": "Worli, Mumbai", "age": 25, "phone_number": "9876543216"},
+    {"name": "Hridesh Subedi", "address": "Kathmandu, Nepal", "age": 22, "phone_number": "9876543200"},
 ]
 
 ```
