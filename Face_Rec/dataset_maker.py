@@ -11,7 +11,7 @@ mtcnn = MTCNN(keep_all=False, device=device)
 
 # Paths
 input_base = 'Face_Data'
-output_base = 'Face_Data_Cropped'
+output_base = 'Face_Data_Cropped_Hridesh'
 
 # Create output directories
 os.makedirs(output_base, exist_ok=True)
