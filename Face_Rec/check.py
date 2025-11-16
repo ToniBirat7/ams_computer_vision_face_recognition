@@ -16,7 +16,7 @@ mtcnn = MTCNN(keep_all=True, device=device)
 model = InceptionResnetV1(pretrained='casia-webface').eval().to(device)
 
 # Load known embeddings
-with open('Face_Rec/known_face_embeddings_hridesh_added.pkl', 'rb') as f:
+with open('Face_Rec/known_face_embeddings_2.pkl', 'rb') as f:
     known_embeddings = pickle.load(f)
 
 # Define prediction transform (no augmentation!)

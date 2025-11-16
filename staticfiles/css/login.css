@@ -129,10 +129,14 @@ body {
   height: 200px;
   padding: 1.5rem;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--primary) 0%, #004b74 100%);
+  /* background: linear-gradient(135deg, var(--primary) 0%, #004b74 100%); */
   box-shadow: 0 8px 32px rgba(0, 59, 92, 0.15);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-wrapper img {
+  width: 100%;
 }
 
 .logo {
@@ -144,7 +148,7 @@ body {
 
 .logo-wrapper:hover {
   transform: translateY(-5px);
-  background: linear-gradient(135deg, #004b74 0%, var(--primary) 100%);
+  /* background: linear-gradient(135deg, #004b74 0%, var(--primary) 100%); */
   box-shadow: 0 12px 40px rgba(0, 59, 92, 0.25);
   transition: all 0.3s ease;
 }
