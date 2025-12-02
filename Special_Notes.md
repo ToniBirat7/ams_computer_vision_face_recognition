@@ -12,16 +12,15 @@ Students List To Be Added For Prediction
 
 Copy the `list` from Seed.py
 
-Navigate to the project running directory. 
+Navigate to the project running directory.
 
 Run : `python manage.py shell`
 
 Run : `from auth_app.models import Student`
 
-Run : 
+Run :
 
 ```Python
-
 students_data = [
     {"name": "Akshay Kumar", "address": "Mumbai, MH", "age": 27, "phone_number": "9876543210"},
     {"name": "Alia Bhatt", "address": "Juhu, Mumbai", "age": 24, "phone_number": "9876543211"},
@@ -30,16 +29,12 @@ students_data = [
     {"name": "Hrithik Roshan", "address": "Andheri West, Mumbai", "age": 29, "phone_number": "9876543214"},
     {"name": "Priyanka Chopra", "address": "Bandra, Mumbai", "age": 28, "phone_number": "9876543215"},
     {"name": "Virat Kohli", "address": "Worli, Mumbai", "age": 25, "phone_number": "9876543216"},
-    {"name": "Hridesh Subedi", "address": "Kathmandu, Nepal", "age": 22, "phone_number": "9876543200"},
 ]
-
 ```
 
-Run : 
+Run :
 
 ```Python
-
 for data in students_data:
     Student.objects.get_or_create(phone_number=data["phone_number"], defaults=data)
-
 ```
