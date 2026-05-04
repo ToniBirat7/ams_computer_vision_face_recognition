@@ -1,8 +1,40 @@
-env/
-db.sqlite3
-AMS_Practice/
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+
+.venv/
+
+# Django
+db.sqlite3
+*.sqlite3
 media/
+staticfiles/
+env/
+.env
+.env.*
+local_settings.py
+AMS_Practice/
 Face_Data_Cropped/
+migrations/*
+!migrations/__init__.py
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode/IDE
+.vscode/
+.idea/
+.pytest_cache/
+.mypy_cache/
+.coverage
+*.swp
+*.swo
+.ropeproject/
+.pylint.d/
+.python-version

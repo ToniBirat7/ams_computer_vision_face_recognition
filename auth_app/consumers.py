@@ -13,19 +13,22 @@ logger = logging.getLogger(__name__)
 
 class VideoAttendanceConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        print("WebSocket connect attempt")
+        print("\n" + "="*50)
+        print("✓✓✓ WebSocket CONNECT method called")
+        print("="*50)
         logger.info("Attempting to connect to WebSocket")
         try:
             await self.accept()
-            print("WebSocket connection accepted")
+            print("✓ WebSocket connection ACCEPTED")
             logger.info("WebSocket connection accepted")
             
             # Don't initialize camera here, wait for start_stream command
             self.camera = None
             self.detected_students = set()  # Keep track of detected students
+            print(f"✓ Initialized: camera={self.camera}, detected_students={self.detected_students}")
             
         except Exception as e:
-            print(f"Error in connect: {str(e)}")
+            print(f"✗ Error in connect: {str(e)}")
             logger.error(f"Error in WebSocket connection: {str(e)}")
             await self.close()
 
@@ -69,23 +72,24 @@ class VideoAttendanceConsumer(AsyncWebsocketConsumer):
                                 print(f"Student with {name} and course id {curr_courseid} is not found stu {student}")
                             else:
                                 print("\nThe student is ", student)
-
-                            print(f"Student ID: {student.id}, Already detected: {student.id in self.detected_students}")
-                            if student and student.id not in self.detected_students:
-                                self.detected_students.add(student.id)
+                                print(f"Student ID: {student.student.id}, Already detected: {student.student.id in self.detected_students}")
+                            if student and student.student.id not in self.detected_students:
+                                self.detected_students.add(student.student.id)
                                 # Send student detection update
-                                await self.send(text_data=json.dumps({
-                                    'type': 'frame_update',
+                                message_data = {
+                                    'type': 'student_detected',
                                     'frame': f'data:image/jpeg;base64,{frame_base64}',
                                     'student': {
                                         'id': student.student.id,
                                         'name': student.student.name,
                                         'similarity': similarity,
                                     }
-                                }))
+                                }
+                                print(f"Sending student_detected: {message_data['student']}")
+                                await self.send(text_data=json.dumps(message_data))
                             else:
                                 await self.send(text_data=json.dumps({
-                                    'type': 'already_detected',
+                                    'type': 'frame_update',
                                     'frame': f'data:image/jpeg;base64,{frame_base64}',
                                     # 'recognition_result': result if result else 'No face detected'
                                 }))
@@ -122,19 +126,26 @@ class VideoAttendanceConsumer(AsyncWebsocketConsumer):
             return None
 
     async def receive(self, text_data):
+        print("\n✓ RECEIVE METHOD CALLED!")
         print(f"Received message: {text_data}")
         try:
             data = json.loads(text_data)
             if data.get('type') == 'start_stream':
                 self.course_id = data.get('courseid')
                 print("The course ID is:", self.course_id)
+                # ALWAYS reset detected students when starting new stream
+                print(f"✓ BEFORE clear(): detected_students = {self.detected_students}")
+                self.detected_students.clear()
+                print(f"✓ AFTER clear(): detected_students = {self.detected_students}")
+                
                 # Initialize camera only when streaming starts
                 if not self.camera:
                     self.camera = cv2.VideoCapture(0)
                     if not self.camera.isOpened():
                         raise Exception("Could not open camera")
-                    self.detected_students.clear()  # Reset detected students
                     asyncio.create_task(self.process_frames())
+                else:
+                    print("Camera already open, reusing existing stream")
             elif data.get('type') == 'stop_stream':
                 if self.camera:
                     self.camera.release()

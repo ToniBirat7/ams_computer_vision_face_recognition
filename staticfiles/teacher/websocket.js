@@ -1,213 +1,226 @@
 class VideoAttendance {
-    constructor() {
-        this.video = document.getElementById('videoElement');
-        this.statusText = document.getElementById('statusText');
-        this.detectedList = document.getElementById('detectedStudents');
-        this.videoContainer = document.getElementById('videoFeedContainer');
-        this.startBtn = document.getElementById('startVideoBtn');
-        this.closeBtn = document.getElementById('closeVideoBtn');
-        this.ws = null;
-        this.detectedStudents = new Set();
-        
-        this.setupEventListeners();
-        // this.setupWebSocket();
-        
-        // Absent Present Counter
-        this.totalStudents = document.querySelectorAll('.student-row').length;
-        this.presentCounter = document.getElementById('presentCount').querySelector('h3');
-        this.absentCounter = document.getElementById('absentCount').querySelector('h3');
+  constructor() {
+    try {
+      console.log('[CONSTRUCTOR] Starting VideoAttendance constructor');
+      this.video = document.getElementById('videoElement');
+      console.log('[CONSTRUCTOR] video element:', this.video);
+      this.statusText = document.getElementById('statusText');
+      console.log('[CONSTRUCTOR] statusText element:', this.statusText);
+      this.detectedList = document.getElementById('detectedStudents');
+      console.log('[CONSTRUCTOR] detectedList element:', this.detectedList);
+      this.videoContainer = document.getElementById('videoFeedContainer');
+      console.log('[CONSTRUCTOR] videoContainer element:', this.videoContainer);
+      this.startBtn = document.getElementById('startVideoBtn');
+      console.log('[CONSTRUCTOR] startBtn element:', this.startBtn);
+      this.closeBtn = document.getElementById('closeVideoBtn');
+      console.log('[CONSTRUCTOR] closeBtn element:', this.closeBtn);
+      this.ws = null;
+      this.detectedStudents = new Set();
+
+      this.setupEventListeners();
+      this.setupWebSocket();
+      console.log('[CONSTRUCTOR] VideoAttendance initialized successfully');
+    } catch (error) {
+      console.error('[CONSTRUCTOR] Error in VideoAttendance constructor:', error);
+      throw error;
     }
+  }
 
-    setupEventListeners() {
-        this.startBtn.addEventListener('click', () => this.startVideoAttendance());
-        this.closeBtn.addEventListener('click', () => this.stopVideoAttendance());
+  setupEventListeners() {
+    this.startBtn.addEventListener('click', () => this.startVideoAttendance());
+    this.closeBtn.addEventListener('click', () => this.stopVideoAttendance());
+  }
+
+  setupWebSocket() {
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    console.log('Protocol:', window.location.protocol);
+    console.log('Host:', window.location.host);
+
+    const wsUrl = `${wsScheme}://${window.location.host}/ws/attendance/`;
+    console.log('Attempting to connect to WebSocket URL:', wsUrl);
+
+    try {
+      this.ws = new WebSocket(wsUrl);
+      console.log('WebSocket instance created');
+
+      this.ws.onopen = () => {
+        console.log('WebSocket connection established');
+        this.updateStatus('Connected to face recognition service');
+      };
+
+      this.ws.onmessage = (event) => {
+        console.log('Received message:', event.data);
+        const data = JSON.parse(event.data);
+        this.handleWebSocketMessage(data);
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        console.error('WebSocket readyState:', this.ws.readyState);
+        this.updateStatus('Connection error', 'error');
+      };
+
+      this.ws.onclose = (event) => {
+        console.log(
+          'WebSocket closed with code:',
+          event.code,
+          'reason:',
+          event.reason,
+        );
+        console.log('WebSocket readyState:', this.ws.readyState);
+        this.updateStatus('Disconnected', 'error');
+      };
+    } catch (error) {
+      console.error('Error creating WebSocket:', error);
     }
+  }
 
-    setupWebSocket() {
-        const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        console.log('Protocol:', window.location.protocol);
-        console.log('Host:', window.location.host);
-        
-        const wsUrl = `${wsScheme}://${window.location.host}/ws/attendance/`;
-        console.log('Attempting to connect to WebSocket URL:', wsUrl);
-        
-        try {
-            this.ws = new WebSocket(wsUrl);
-            console.log('WebSocket instance created');
-            
-            this.ws.onopen = () => {
-                console.log('WebSocket connection established');
-                this.updateStatus('Connected to face recognition service');
-            };
+  startVideoAttendance() {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      // Show video container
+      this.videoContainer.classList.remove('hidden');
+      this.startBtn.disabled = true;
 
-            this.ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if(data.student) {
-                    console.log('Received message:', {"type" : data.type, "stu": data.student});
-                }
-                else {
-                    console.log('Received message:', {"type" : data.type});
-                }
-                this.handleWebSocketMessage(data);
-            };
+      // Extract course ID from URL (e.g., /teacher/attendance/1/)
+      const pathParts = window.location.pathname.split('/').filter((p) => p);
+      const courseId = pathParts[pathParts.length - 1];
 
-            this.ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-                console.error('WebSocket readyState:', this.ws.readyState);
-                this.updateStatus('Connection error', 'error');
-            };
-            this.ws.onclose = (event) => {
-                if (this.ws) {
-                    console.log('WebSocket closed with code:', event.code, 'reason:', event.reason);
-                    console.log('WebSocket readyState:', this.ws.readyState);
-                }
-                this.updateStatus('Disconnected', 'error');
-                this.ws = null;
-            };
-        } catch (error) {
-            console.error('Error creating WebSocket:', error);
+      console.log('Extracted course ID:', courseId);
+
+      // Request backend to start streaming with course ID
+      this.ws.send(
+        JSON.stringify({
+          type: 'start_stream',
+          courseid: parseInt(courseId),
+        }),
+      );
+    } else {
+      this.updateStatus('Not connected to server', 'error');
+    }
+  }
+
+  handleWebSocketMessage(data) {
+    try {
+      console.log('Received message type:', data.type, 'data:', data);
+      if (!data || !data.type) {
+        console.warn('Invalid message: no type', data);
+        return;
+      }
+
+      if (data.type === 'frame_update' || data.type === 'no_detected') {
+        // Update video frame (for both regular frames and no-detection frames)
+        if (data.frame) {
+          this.video.src = data.frame;
         }
-    }
+      } else if (data.type === 'student_detected') {
+        const student = data.student;
+        console.log('Student detected:', student);
+        console.log(
+          'Student object keys:',
+          student ? Object.keys(student) : 'NULL',
+        );
+        if (student && !this.detectedStudents.has(student.id)) {
+          this.detectedStudents.add(student.id);
+          console.log('Adding student to detected list:', student);
 
-    // startVideoAttendance() {
-    //     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-    //         // Show video container
-    //         this.videoContainer.classList.remove('hidden');
-    //         this.startBtn.disabled = true;
+          // Update detected students list
+          const studentElement = document.createElement('div');
+          studentElement.className = 'detected-student';
+          const name = student.name || 'Unknown';
+          const similarity =
+            typeof student.similarity === 'number'
+              ? (student.similarity * 100).toFixed(2)
+              : 'N/A';
+          studentElement.textContent = `${name} (${similarity}%)`;
+          this.detectedList.appendChild(studentElement);
 
-    //         const segments = window.location.pathname.split('/').filter(Boolean);
-    //         const courseId = segments[segments.length - 1]; // This gives '2'
-    //         console.log(`The course Id is ${courseId}`);
+          // Mark student as present in the attendance form
+          const checkbox = document.getElementById(`status_${student.id}`);
+          console.log(
+            'Looking for checkbox:',
+            `status_${student.id}`,
+            'found:',
+            !!checkbox,
+          );
+          if (checkbox) {
+            checkbox.checked = true;
+            this.updateAttendanceCounts();
+          }
 
-    //         // Request backend to start streaming
-    //         this.ws.send(JSON.stringify({
-    //             type: 'start_stream',
-    //             courseid: courseId
-    //         }));
-    //     } else {
-    //         this.updateStatus('Not connected to server', 'error');
-    //     }
-    // }
-
-    startVideoAttendance() {
-        if (!this.ws || this.ws.readyState === WebSocket.CLOSED) {
-            this.setupWebSocket();
+          // Update status
+          const statusMsg = `Detected: ${name}`;
+          this.updateStatus(statusMsg);
         }
+      } else if (data.type === 'error') {
+        const message = (data && data.message) || 'Unknown error';
+        this.updateStatus(`Error: ${message}`, 'error');
+      } else {
+        console.warn('Unknown message type:', data.type, 'full data:', data);
+      }
+    } catch (error) {
+      console.error('Error handling WebSocket message:', error, data);
+    }
+  }
 
-        const waitForOpen = () => {
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                // Show video container
-                this.videoContainer.classList.remove('hidden');
-                this.startBtn.disabled = true;
+  updateAttendanceCounts() {
+    const totalStudents = document.querySelectorAll('.student-row').length;
+    const presentStudents = document.querySelectorAll(
+      '.status-checkbox:checked',
+    ).length;
 
-                const segments = window.location.pathname.split('/').filter(Boolean);
-                const courseId = segments[segments.length - 1];
-                console.log(`The course Id is ${courseId}`);
+    document.querySelector('#presentCount h3').textContent = presentStudents;
+    document.querySelector('#absentCount h3').textContent =
+      totalStudents - presentStudents;
+  }
 
-                this.ws.send(JSON.stringify({
-                    type: 'start_stream',
-                    courseid: courseId
-                }));
-            } else {
-                setTimeout(waitForOpen, 100); // Keep retrying until WebSocket is open
-            }
-        };
+  updateStatus(message, type = 'info') {
+    this.statusText.textContent = message;
+    this.statusText.className = `status-text ${type}`;
+  }
 
-        waitForOpen();
+  stopVideoAttendance() {
+    // Close WebSocket
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
 
-    handleWebSocketMessage(data) {
-        console.log('****************')
-        if (data.type === 'frame_update') {
-            // Update video frame
-            this.video.src = data.frame;
+    // Reset UI
+    this.videoContainer.classList.add('hidden');
+    this.startBtn.disabled = false;
+    this.detectedList.innerHTML = '';
 
-            console.log("Recognition Result is Not Found")
-            const name = data.student.name;
-            const similarity = data.student.similarity;
-            const id = data.student.id;
-            this.updateDetectedStudents(id);
-            this.updateStatus(`Detected: ${name} (${similarity})`);
-        }
-        else if (data.type === 'no_detected') {
-            this.video.src = data.frame;
-        }
-        else if (data.type === 'error') {
-            this.updateStatus(data.message, 'error');
-        }
-        else {
-            console.log(`We are left with type : ${data.type}`)
-            this.video.src = data.frame;
-        }
-    }
+    // Mark remaining students as absent
+    this.markRemainingAbsent();
+  }
 
-    updateDetectedStudents(id) {
-        if (!this.detectedStudents.has(id)) {
-            this.detectedStudents.add(id);
-            
-            // // Update the UI
-            // const studentElement = document.createElement('div');
-            // studentElement.className = 'detected-student';
-            // studentElement.textContent = id;
-            // this.detectedList.appendChild(studentElement);
-
-            // Mark the student as present in the attendance form
-            const studentRow = document.querySelector(`[data-student-id="${id}"]`);
-            console.log(`Student with id ${id} is found`)
-            console.log(`Found Student Row`)
-            console.log(studentRow)
-            if (studentRow) {
-                const checkbox = studentRow.querySelector('input[type="checkbox"]');
-                if (checkbox) {
-                    checkbox.checked = true;
-                    this.updateCounters();
-                }
-            }
-            else{
-                this.updateStatus(`${studentName} is not in the database`);
-            }
-        }
-    }
-
-    // Update counters function
-    updateCounters() {
-        const presentCount = document.querySelectorAll('.status-checkbox:checked').length;
-        const absentCount = this.totalStudents - presentCount;
-        
-        this.presentCounter.textContent = presentCount;
-        this.absentCounter.textContent = absentCount;
-    }
-
-    updateStatus(message, type = 'info') {
-        this.statusText.textContent = message;
-        this.statusText.className = `status-text ${type}`;
-    }
-
-    stopVideoAttendance() {
-        // Close WebSocket
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-        
-        // Reset UI
-        this.videoContainer.classList.add('hidden');
-        this.startBtn.disabled = false;
-        this.detectedList.innerHTML = '';
-        
-        // Mark remaining students as absent
-        this.markRemainingAbsent();
-    }
-
-    markRemainingAbsent() {
-        document.querySelectorAll('.status-checkbox:not(:checked)').forEach(checkbox => {
-            checkbox.checked = false;
-            checkbox.dispatchEvent(new Event('change'));
-        });
-    }
+  markRemainingAbsent() {
+    document
+      .querySelectorAll('.status-checkbox:not(:checked)')
+      .forEach((checkbox) => {
+        checkbox.checked = false;
+        checkbox.dispatchEvent(new Event('change'));
+      });
+  }
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new VideoAttendance();
-}); 
+// Initialize immediately AND on DOMContentLoaded
+console.log('[INIT] Script loaded, document.readyState:', document.readyState);
+
+function initVideoAttendance() {
+  console.log('[INIT] Initializing VideoAttendance');
+  try {
+    window.videoAttendance = new VideoAttendance();
+    console.log('[INIT] VideoAttendance initialized successfully');
+  } catch (error) {
+    console.error('[INIT] Error initializing VideoAttendance:', error);
+  }
+}
+
+// If DOM is already ready, initialize immediately
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initVideoAttendance);
+} else {
+  // DOM is already loaded, initialize now
+  initVideoAttendance();
+}
