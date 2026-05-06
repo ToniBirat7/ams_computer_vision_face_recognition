@@ -3,8 +3,8 @@ import openpyxl
 from datetime import date
 
 from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from apps.accounts.views import api_login_required
 from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -12,7 +12,7 @@ from django.core.files.storage import default_storage
 from apps.accounts.models import Teacher, Course, StudentClass, Attendance
 
 
-@login_required
+@api_login_required
 def take_attendance(request, course_id):
     """Accept POST from Next.js attendance form and save records."""
     if request.method != 'POST':
@@ -44,7 +44,7 @@ def take_attendance(request, course_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required
+@api_login_required
 def download_report(request, course_id):
     """Return an Excel attendance report for the given course."""
     try:
@@ -74,7 +74,7 @@ def download_report(request, course_id):
         return HttpResponse('Course not found.', status=404)
 
 
-@login_required
+@api_login_required
 @require_POST
 def edit_profile(request):
     """Update teacher contact info and email."""
