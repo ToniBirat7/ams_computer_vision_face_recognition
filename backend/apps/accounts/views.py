@@ -17,12 +17,21 @@ from scipy import stats
 # Django Imports
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
+from functools import wraps
+
+def api_login_required(view_func):
+    """Return JSON 401 for unauthenticated requests instead of redirecting."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 # Local Imports
 from .models import (
@@ -36,7 +45,7 @@ from .models import (
 
 # ── Admin CRUD endpoints (for Next.js frontend) ─────────────────────────────
 
-@login_required
+@api_login_required
 @require_POST
 def add_student(request):
     try:
@@ -60,7 +69,7 @@ def add_student(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
-@login_required
+@api_login_required
 @require_POST
 def add_course(request):
     try:
@@ -87,7 +96,7 @@ def add_course(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
-@login_required
+@api_login_required
 @require_POST
 def add_student_class(request):
     try:
@@ -144,7 +153,7 @@ def api_logout(request):
     return JsonResponse({'message': 'Logged out'})
 
 
-@login_required
+@api_login_required
 def api_whoami(request):
     is_teacher = Teacher.objects.filter(user=request.user).exists()
     return JsonResponse({
@@ -157,7 +166,7 @@ def api_whoami(request):
         'role': 'admin' if request.user.is_superuser else 'teacher',
     })
 
-@login_required
+@api_login_required
 def get_student(request, id):
     student = get_object_or_404(Student, id=id)
     data = {
@@ -168,7 +177,7 @@ def get_student(request, id):
     }
     return JsonResponse(data)
 
-@login_required
+@api_login_required
 def edit_student(request, id):
     if request.method == 'POST':
         student = get_object_or_404(Student, id=id)
@@ -185,7 +194,7 @@ def edit_student(request, id):
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-@login_required
+@api_login_required
 @require_POST
 def update_student(request):
     try:
@@ -216,7 +225,7 @@ def update_student(request):
             'message': str(e)
         }, status=500)
 
-@login_required
+@api_login_required
 @require_POST
 def delete_student(request, id):
     try:
@@ -240,7 +249,7 @@ def delete_student(request, id):
             'error': str(e)
         }, status=500)
 
-@login_required
+@api_login_required
 def get_teacher(request, id):
     teacher = get_object_or_404(Teacher, id=id)
     data = {
@@ -252,7 +261,7 @@ def get_teacher(request, id):
     }
     return JsonResponse(data)
 
-@login_required
+@api_login_required
 @require_POST
 def update_teacher(request):
     try:
@@ -283,7 +292,7 @@ def update_teacher(request):
             'message': str(e)
         }, status=500)
 
-@login_required
+@api_login_required
 @require_POST
 def delete_teacher(request, id):
     try:
@@ -312,7 +321,7 @@ def delete_teacher(request, id):
             'error': str(e)
         }, status=500)
 
-@login_required
+@api_login_required
 def get_student_report(request, student_id):
     try:
         student = Student.objects.get(id=student_id)
@@ -587,7 +596,7 @@ def predict_performance(request, student_id):
             'details': str(e)
         }, status=500)
 
-@login_required
+@api_login_required
 @require_POST
 def alter_attendance(request, attendance_id):
     try:
@@ -605,7 +614,7 @@ def alter_attendance(request, attendance_id):
 
 # ── JSON API endpoints for Next.js frontend ──────────────────────────────────
 
-@login_required
+@api_login_required
 def api_dashboard(request):
     teachers = Teacher.objects.select_related('user').all()
     students = Student.objects.order_by('-id')[:5]
@@ -650,7 +659,7 @@ def api_dashboard(request):
     })
 
 
-@login_required
+@api_login_required
 def api_teachers_list(request):
     teachers = Teacher.objects.select_related('user').all()
     return JsonResponse({
@@ -672,7 +681,7 @@ def api_teachers_list(request):
     })
 
 
-@login_required
+@api_login_required
 def api_students_list(request):
     students = Student.objects.all()
     return JsonResponse({
@@ -689,7 +698,7 @@ def api_students_list(request):
     })
 
 
-@login_required
+@api_login_required
 def api_courses_list(request):
     courses = Course.objects.select_related('teacher', 'teacher__user').all()
     return JsonResponse({
@@ -708,7 +717,7 @@ def api_courses_list(request):
     })
 
 
-@login_required
+@api_login_required
 def api_teacher_courses(request):
     """Courses assigned to the logged-in teacher."""
     try:
@@ -734,7 +743,7 @@ def api_teacher_courses(request):
     })
 
 
-@login_required
+@api_login_required
 def api_teacher_profile(request):
     try:
         teacher = request.user.teacher
@@ -756,7 +765,7 @@ def api_teacher_profile(request):
     })
 
 
-@login_required
+@api_login_required
 def api_attendance_data(request, course_id):
     """Students enrolled in a course + their past attendance."""
     course = get_object_or_404(Course, id=course_id)
@@ -789,7 +798,7 @@ def api_attendance_data(request, course_id):
     })
 
 
-@login_required
+@api_login_required
 def api_users_list(request):
     users = User.objects.exclude(is_superuser=True)
     return JsonResponse({
@@ -800,7 +809,7 @@ def api_users_list(request):
     })
 
 
-@login_required
+@api_login_required
 def api_attendance_record(request, attendance_id):
     attendance = get_object_or_404(Attendance, id=attendance_id)
     return JsonResponse({
@@ -813,7 +822,7 @@ def api_attendance_record(request, attendance_id):
     })
 
 
-@login_required
+@api_login_required
 def api_teacher_details(request, teacher_id):
     teacher = get_object_or_404(Teacher.objects.select_related('user'), id=teacher_id)
     courses = Course.objects.filter(teacher=teacher)
@@ -847,7 +856,7 @@ def api_teacher_details(request, teacher_id):
     })
 
 
-@login_required
+@api_login_required
 def api_review_attendance(request):
     attendance_records = Attendance.objects.select_related('student', 'course').order_by('-today_date')
     return JsonResponse({
@@ -866,7 +875,7 @@ def api_review_attendance(request):
 
 # ── Course Management API ────────────────────────────────────────────────────
 
-@login_required
+@api_login_required
 @require_POST
 def delete_course(request, id):
     try:
@@ -879,7 +888,7 @@ def delete_course(request, id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-@login_required
+@api_login_required
 def api_classes_list(request):
     classes = StudentClass.objects.select_related('student', 'course').all()
     return JsonResponse({
@@ -896,7 +905,7 @@ def api_classes_list(request):
     })
 
 
-@login_required
+@api_login_required
 @require_POST
 def delete_class(request, id):
     try:
@@ -909,7 +918,7 @@ def delete_class(request, id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-@login_required
+@api_login_required
 @require_POST
 def register_user(request):
     first_name = request.POST.get('first_name', '').strip()
@@ -939,7 +948,7 @@ def register_user(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-@login_required
+@api_login_required
 @require_POST
 def add_teacher(request):
     user_id = request.POST.get('teacher', '').strip()
