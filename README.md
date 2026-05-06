@@ -19,10 +19,10 @@ Open `http://127.0.0.1:8000` and login with teacher credentials.
 
 ## Features
 
-✅ **Real-Time Face Recognition** - WebSocket video streaming with GPU acceleration  
-✅ **Automatic Attendance Marking** - Students auto-marked present when face recognized  
-✅ **Teacher Dashboard** - Course management and attendance reports  
-✅ **Secure Authentication** - Teacher login with role-based access  
+**Real-Time Face Recognition** - WebSocket video streaming with GPU acceleration  
+**Automatic Attendance Marking** - Students auto-marked present when face recognized  
+**Teacher Dashboard** - Course management and attendance reports  
+**Secure Authentication** - Teacher login with role-based access  
 
 ## Table of Contents (Full Documentation)
 
