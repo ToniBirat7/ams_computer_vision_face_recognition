@@ -3,21 +3,35 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtual environment
 .venv/
+env/
 
 # Django
-db.sqlite3
+backend/db.sqlite3
 *.sqlite3
-media/
-staticfiles/
-env/
+backend/media/
+backend/staticfiles/
+local_settings.py
+
+# Environment files
 .env
 .env.*
-local_settings.py
-AMS_Practice/
-Face_Data_Cropped/
-migrations/*
-!migrations/__init__.py
+!.env.local.example
+!frontend/.env.local.example
+!backend/.env.example
+
+# Face recognition training data
+backend/services/face_recognition/training_data/
+
+# ML model artifacts (regenerate with model_train.py)
+backend/services/face_recognition/embeddings.pkl
+backend/ml_models/
+
+# Next.js
+frontend/.next/
+frontend/node_modules/
+frontend/.env.local
 
 # Logs
 *.log
@@ -27,7 +41,7 @@ logs/
 .DS_Store
 Thumbs.db
 
-# VSCode/IDE
+# IDE
 .vscode/
 .idea/
 .pytest_cache/
