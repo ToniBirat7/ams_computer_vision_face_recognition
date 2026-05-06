@@ -33,6 +33,15 @@ def api_login_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
+
+def validate_required_fields(data: dict, fields: list) -> tuple[bool, str]:
+    """Validate that all required fields are present and non-empty."""
+    for field in fields:
+        value = data.get(field, '').strip() if isinstance(data.get(field), str) else data.get(field)
+        if not value:
+            return False, f'{field} is required'
+    return True, ''
+
 # Local Imports
 from .models import (
     Teacher,
@@ -49,15 +58,37 @@ from .models import (
 @require_POST
 def add_student(request):
     try:
-        name = request.POST.get('name')
-        address = request.POST.get('address')
-        age = request.POST.get('age')
-        phone_number = request.POST.get('phone_number')
+        name = request.POST.get('name', '').strip()
+        address = request.POST.get('address', '').strip()
+        age = request.POST.get('age', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+
+        # Validate required fields
+        valid, msg = validate_required_fields({
+            'name': name,
+            'address': address,
+            'age': age,
+            'phone_number': phone_number
+        }, ['name', 'address', 'age', 'phone_number'])
+        if not valid:
+            return JsonResponse({'success': False, 'error': msg}, status=400)
+
+        # Validate age range
+        try:
+            age_int = int(age)
+            if age_int < 15 or age_int > 50:
+                return JsonResponse({'success': False, 'error': 'Age must be between 15 and 50'}, status=400)
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'Age must be a valid number'}, status=400)
+
+        # Validate phone format (basic)
+        if not phone_number.isdigit() or len(phone_number) < 10:
+            return JsonResponse({'success': False, 'error': 'Phone number must be at least 10 digits'}, status=400)
 
         student = Student.objects.create(
             name=name,
             address=address,
-            age=int(age),
+            age=age_int,
             phone_number=phone_number
         )
         return JsonResponse({
@@ -73,16 +104,34 @@ def add_student(request):
 @require_POST
 def add_course(request):
     try:
-        teacher_id = request.POST.get('teacher')
-        title = request.POST.get('title')
-        duration = request.POST.get('duration')
-        shift = request.POST.get('shift', 'M')
+        teacher_id = request.POST.get('teacher', '').strip()
+        title = request.POST.get('title', '').strip()
+        duration = request.POST.get('duration', '').strip()
+        shift = request.POST.get('shift', 'M').strip()
+
+        # Validate required fields
+        if not teacher_id or not title or not duration:
+            return JsonResponse({'success': False, 'error': 'Teacher, title, and duration are required'}, status=400)
+        if len(title) < 3 or len(title) > 100:
+            return JsonResponse({'success': False, 'error': 'Course title must be 3-100 characters'}, status=400)
+
+        # Validate duration
+        try:
+            duration_int = int(duration)
+            if duration_int < 1 or duration_int > 52:
+                return JsonResponse({'success': False, 'error': 'Duration must be 1-52 weeks'}, status=400)
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'Duration must be a valid number'}, status=400)
+
+        # Validate shift
+        if shift not in ['M', 'A', 'E']:
+            return JsonResponse({'success': False, 'error': 'Shift must be M (Morning), A (Afternoon), or E (Evening)'}, status=400)
 
         teacher = Teacher.objects.get(id=teacher_id)
         course = Course.objects.create(
             teacher=teacher,
             title=title,
-            duration=int(duration),
+            duration=duration_int,
             shift=shift
         )
         return JsonResponse({
@@ -930,10 +979,26 @@ def register_user(request):
 
     if not all([first_name, last_name, username, email, password1, password2]):
         return JsonResponse({'success': False, 'error': 'All fields are required'}, status=400)
+
+    # Password validation
+    if len(password1) < 8:
+        return JsonResponse({'success': False, 'error': 'Password must be at least 8 characters'}, status=400)
     if password1 != password2:
         return JsonResponse({'success': False, 'error': 'Passwords do not match'}, status=400)
+    if not any(c.isupper() for c in password1):
+        return JsonResponse({'success': False, 'error': 'Password must contain at least one uppercase letter'}, status=400)
+    if not any(c.isdigit() for c in password1):
+        return JsonResponse({'success': False, 'error': 'Password must contain at least one digit'}, status=400)
+
+    # Username/Email validation
+    if len(username) < 3:
+        return JsonResponse({'success': False, 'error': 'Username must be at least 3 characters'}, status=400)
     if User.objects.filter(username=username).exists():
         return JsonResponse({'success': False, 'error': f'Username {username} already exists'}, status=400)
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({'success': False, 'error': 'Email already registered'}, status=400)
+    if '@' not in email or '.' not in email.split('@')[1]:
+        return JsonResponse({'success': False, 'error': 'Invalid email address'}, status=400)
 
     try:
         User.objects.create_user(
@@ -969,6 +1034,16 @@ def add_teacher(request):
 
     if Teacher.objects.filter(user=user).exists():
         return JsonResponse({'success': False, 'error': f'Teacher profile for {user.username} already exists'}, status=400)
+
+    # Validate file upload if provided
+    if my_image:
+        # Check file size (max 2MB)
+        if my_image.size > 2 * 1024 * 1024:
+            return JsonResponse({'success': False, 'error': 'File size must be less than 2MB'}, status=400)
+        # Check MIME type (images only)
+        allowed_mimes = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+        if my_image.content_type not in allowed_mimes:
+            return JsonResponse({'success': False, 'error': f'Invalid file type. Allowed: {", ".join(allowed_mimes)}'}, status=400)
 
     try:
         Teacher.objects.create(
