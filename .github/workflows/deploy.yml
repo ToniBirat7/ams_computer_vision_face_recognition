@@ -1,0 +1,74 @@
+name: Deploy BCU AMS to birat.codes
+
+on:
+  workflow_dispatch: # Run manually from the Actions tab
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          tags: tag:ci
+
+      - name: Verify Connection (Port 22 Check)
+        run: |
+          echo "Checking Tailscale status..."
+          tailscale status
+          echo "Testing SSH connection to ${{ secrets.VM_HOST }} on port 22..."
+          nc -zv ${{ secrets.VM_HOST }} 22
+
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: 22
+          timeout: 30s
+          command_timeout: 15m
+          script_stop: true
+          script: |
+            cd ~/BCU_AMS_CV_Project
+
+            # Stash any local modifications so pull can proceed cleanly
+            git stash push --include-untracked -m "pre-deploy-$(date +%s)" || true
+
+            # Pull latest changes from master
+            git pull --ff-only origin master
+
+            # ── Backend (Django) ─────────────────────────────────────────
+            source .venv/bin/activate
+
+            pip install -r backend/requirements.txt --quiet
+
+            cd backend
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput --clear
+            cd ..
+
+            deactivate
+
+            # ── Frontend (Next.js) ───────────────────────────────────────
+            cd frontend
+            rm -rf node_modules .next
+            npm ci
+            npm run build
+            cd ..
+
+            # ── Restart Services ─────────────────────────────────────────
+            sudo systemctl restart bcuams-django
+            pm2 restart bcuams-frontend || pm2 start npm --name "bcuams-frontend" -- start --prefix frontend
+
+            echo "✅ BCU AMS deployed successfully at $(date)"
