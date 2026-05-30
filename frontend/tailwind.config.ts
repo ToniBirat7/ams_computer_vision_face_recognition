@@ -1,48 +1,73 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class',
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     screens: {
+      xs: '480px',
+      sm: '584px',
+      md: '768px',
+      lg: '992px',
+      xl: '1024px',
       '2xl': '1200px',
-      xl:    '1024px',
-      lg:    '992px',
-      md:    '768px',
-      sm:    '584px',
-      xs:    '480px',
     },
     extend: {
       colors: {
-        primary:          '#003b5c',
-        secondary:        '#00a4bd',
-        accent:           '#e31837',
-        background:       '#f5f7fa',
-        'text-primary':   '#2d3748',
-        'text-secondary': '#4a5568',
-        error:            '#e53e3e',
-        success:          '#38a169',
-        warning:          '#f6ad55',
-        'status-present': '#34d399',
-        'status-absent':  '#ef4444',
-        'status-na':      '#9ca3af',
-      },
-      boxShadow: {
-        sm: '0 2px 4px rgba(0,0,0,0.1)',
-        md: '0 4px 6px rgba(0,0,0,0.1)',
-        lg: '0 10px 15px rgba(0,0,0,0.1)',
+        bg:             'var(--bg)',
+        surface:        'var(--surface)',
+        'surface-2':    'var(--surface-2)',
+        'surface-3':    'var(--surface-3)',
+        border:         'var(--border)',
+        'border-strong':'var(--border-strong)',
+        fg:             'var(--fg)',
+        'fg-soft':      'var(--fg-soft)',
+        muted:          'var(--muted)',
+
+        brand:          'var(--brand)',
+        'brand-strong': 'var(--brand-strong)',
+        'brand-fg':     'var(--brand-fg)',
+        accent:         'var(--accent)',
+        'accent-strong':'var(--accent-strong)',
+        danger:         'var(--danger)',
+        success:        'var(--success)',
+        warning:        'var(--warning)',
+
+        'brand-soft':   'var(--brand-soft)',
+        'accent-soft':  'var(--accent-soft)',
+        'danger-soft':  'var(--danger-soft)',
+        'success-soft': 'var(--success-soft)',
+        'warning-soft': 'var(--warning-soft)',
+
+        sidebar:        'var(--sidebar-bg)',
+        'sidebar-2':    'var(--sidebar-bg-2)',
       },
       borderRadius: {
-        card:  '12px',
-        input: '8px',
-        badge: '20px',
+        badge: '999px',
+        input: '10px',
+        card:  '16px',
+        xl2:   '20px',
+      },
+      boxShadow: {
+        xs: '0 1px 2px hsl(var(--shadow-color) / 0.06)',
+        sm: '0 2px 8px hsl(var(--shadow-color) / 0.08)',
+        md: '0 6px 20px hsl(var(--shadow-color) / 0.10)',
+        lg: '0 16px 40px hsl(var(--shadow-color) / 0.14)',
       },
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
-        nunito:  ['Nunito',  'sans-serif'],
-        inter:   ['Inter',   'sans-serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+      },
+      keyframes: {
+        fadeIn:  { from: { opacity: '0' }, to: { opacity: '1' } },
+        scaleIn: { from: { opacity: '0', transform: 'scale(.96)' }, to: { opacity: '1', transform: 'scale(1)' } },
+      },
+      animation: {
+        fadeIn:  'fadeIn .4s ease both',
+        scaleIn: 'scaleIn .2s ease both',
       },
     },
   },
   plugins: [],
 }
+
 export default config

@@ -3,7 +3,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import { Plus, Trash2, BookOpen } from 'lucide-react'
+import { getCourses, deleteCourse } from '@/lib/api'
 import type { Course } from '@/types/api'
+import {
+  Card, Button, Badge, EmptyState, Spinner, PageHeader,
+  Table, THead, TBody, TRow, TCell, Reveal,
+} from '@/components/ui'
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([])
@@ -11,106 +17,53 @@ export default function CoursesPage() {
   const [deleting, setDeleting] = useState<number | null>(null)
 
   useEffect(() => {
-    fetchCourses()
+    getCourses().then(setCourses).catch(() => toast.error('Failed to load courses')).finally(() => setLoading(false))
   }, [])
 
-  const fetchCourses = async () => {
-    try {
-      const r = await fetch('/api/django/api/courses/', { credentials: 'include' })
-      if (!r.ok) throw new Error('Failed to load courses')
-      const data = await r.json()
-      setCourses(data.courses ?? [])
-    } catch {
-      toast.error('Failed to load courses')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const deleteCourse = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this course?')) return
+  const remove = async (id: number) => {
+    if (!confirm('Delete this course?')) return
     setDeleting(id)
     try {
-      const r = await fetch(`/api/django/delete-course/${id}/`, {
-        method: 'POST',
-        credentials: 'include',
-      })
-      if (!r.ok) throw new Error('Failed to delete course')
-      setCourses((prev) => prev.filter((c) => c.id !== id))
-      toast.success('Course deleted successfully')
-    } catch {
-      toast.error('Failed to delete course')
-    } finally {
-      setDeleting(null)
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-[#003b5c] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+      const r = await deleteCourse(id)
+      if (!r.ok) throw new Error()
+      setCourses((p) => p.filter((c) => c.id !== id)); toast.success('Course deleted')
+    } catch { toast.error('Failed to delete course') } finally { setDeleting(null) }
   }
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#2d3748]">Courses</h1>
-          <p className="text-[#4a5568] text-sm mt-1">Manage all courses</p>
-        </div>
-        <Link
-          href="/admin/courses/add"
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#003b5c] text-white text-sm font-medium rounded-input hover:bg-[#002d47] transition-colors"
-        >
-          <i className="bx bx-plus-circle" />
-          Add Course
-        </Link>
-      </header>
+      <Reveal>
+        <PageHeader title="Courses" subtitle={`${courses.length} courses`}
+          actions={<Link href="/admin/courses/add"><Button icon={<Plus className="w-4 h-4" />}>Add Course</Button></Link>} />
+      </Reveal>
 
-      <div className="bg-white rounded-card shadow-sm overflow-hidden">
-        {courses.length === 0 ? (
-          <div className="p-8 text-center">
-            <i className="bx bx-book text-5xl text-[#4a5568] opacity-50 mb-2 block" />
-            <p className="text-[#4a5568]">No courses found. Create one to get started.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ background: '#003b5c' }}>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Title</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Teacher</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Duration</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Shift</th>
-                  <th className="text-right px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {courses.map((course) => (
-                  <tr key={course.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3 font-medium text-[#2d3748]">{course.title}</td>
-                    <td className="px-5 py-3 text-[#4a5568]">{course.teacher_name}</td>
-                    <td className="px-5 py-3 text-[#4a5568]">{course.duration} weeks</td>
-                    <td className="px-5 py-3 text-[#4a5568]">{course.shift_display ?? course.shift}</td>
-                    <td className="px-5 py-3 text-right">
-                      <button
-                        onClick={() => deleteCourse(course.id)}
-                        disabled={deleting === course.id}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-input text-xs font-medium transition-colors disabled:opacity-60"
-                      >
-                        <i className="bx bx-trash" />
-                        Delete
+      {loading ? <Spinner /> : courses.length === 0 ? (
+        <Card><EmptyState icon={BookOpen} title="No courses yet" message="Create your first course." action={<Link href="/admin/courses/add"><Button icon={<Plus className="w-4 h-4" />}>Add Course</Button></Link>} /></Card>
+      ) : (
+        <Reveal>
+          <Card className="overflow-hidden">
+            <Table>
+              <THead columns={[{ label: 'Title' }, { label: 'Teacher' }, { label: 'Duration' }, { label: 'Shift' }, { label: 'Actions', align: 'right' }]} />
+              <TBody>
+                {courses.map((c) => (
+                  <TRow key={c.id}>
+                    <TCell className="font-semibold text-fg">{c.title}</TCell>
+                    <TCell>{c.teacher_name ?? '—'}</TCell>
+                    <TCell>{c.duration} weeks</TCell>
+                    <TCell><Badge tone={c.shift === 'M' ? 'morning' : 'day'}>{c.shift_display ?? (c.shift === 'M' ? 'Morning' : 'Day')}</Badge></TCell>
+                    <TCell align="right">
+                      <button onClick={() => remove(c.id)} disabled={deleting === c.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-danger hover:bg-danger-soft rounded-lg text-xs font-semibold transition-colors disabled:opacity-60">
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
                       </button>
-                    </td>
-                  </tr>
+                    </TCell>
+                  </TRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+              </TBody>
+            </Table>
+          </Card>
+        </Reveal>
+      )}
     </div>
   )
 }
