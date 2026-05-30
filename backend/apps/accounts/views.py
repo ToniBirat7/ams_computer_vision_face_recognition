@@ -8,11 +8,9 @@ from pathlib import Path
 
 # Third Party Imports
 import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from scipy import stats
+# pandas / matplotlib / scipy are imported lazily inside predict_performance() — they
+# add ~80-150 MB resident and only that one view needs them. Deferring keeps the
+# Daphne worker light at boot (matters on RAM-constrained hosts).
 
 # Django Imports
 from django.shortcuts import get_object_or_404
@@ -456,6 +454,15 @@ def get_student_report(request, student_id):
 @require_POST
 def predict_performance(request, student_id):
     try:
+        # Heavy scientific stack — imported here, not at module top, to keep idle RSS
+        # low. Same order as before so matplotlib.dates stays reachable via pyplot.
+        import pandas as pd
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        import matplotlib.dates  # noqa: F401 — used as matplotlib.dates.DateFormatter below
+        from scipy import stats
+
         # Log incoming request data
         print("Received prediction request for student:", student_id)
         print("Request body:", request.body.decode('utf-8'))

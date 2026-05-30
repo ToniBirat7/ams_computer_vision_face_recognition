@@ -2,12 +2,9 @@ import json
 import base64
 import logging
 
-import cv2
-import numpy as np
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from services.face_recognition.check import take_face
 from apps.accounts.models import StudentClass
 
 logger = logging.getLogger(__name__)
@@ -100,6 +97,12 @@ class VideoAttendanceConsumer(AsyncWebsocketConsumer):
 
         Returns (name, similarity) for a confident, known match, else None.
         """
+        # Imported here, not at module top, so torch / opencv / the face models load
+        # on the first frame rather than at ASGI boot — keeps the idle worker light.
+        import cv2
+        import numpy as np
+        from services.face_recognition.check import take_face
+
         b64 = payload.split(",", 1)[1] if "," in payload else payload
         buf = np.frombuffer(base64.b64decode(b64), dtype=np.uint8)
         frame = cv2.imdecode(buf, cv2.IMREAD_COLOR)
