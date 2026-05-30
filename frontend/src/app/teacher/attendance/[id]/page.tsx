@@ -3,22 +3,18 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import {
+  CalendarCheck, Camera, X, ScanFace, Users, UserCheck, UserX,
+  CheckCheck, Save, Check, CircleCheck,
+} from 'lucide-react'
 import { useWebSocket } from '@/hooks/useWebSocket'
+import { getAttendanceData, takeAttendance } from '@/lib/api'
+import { Card, Button, Badge, Avatar, Spinner, Reveal } from '@/components/ui'
+import { cn } from '@/lib/utils'
 
 interface PastRecord { date: string; status: string }
 interface Student { id: number; name: string; past_attendance: PastRecord[] }
 interface CourseInfo { id: number; title: string; shift: string; shift_display?: string }
-
-function getCsrf(): string {
-  const m = document.cookie.match(/csrftoken=([^;]+)/)
-  return m ? m[1] : ''
-}
-
-function statusColor(s: string) {
-  if (s === 'P') return 'bg-green-100 text-green-700'
-  if (s === 'A') return 'bg-red-100 text-red-700'
-  return 'bg-gray-100 text-gray-400'
-}
 
 export default function AttendancePage() {
   const { id: courseId } = useParams<{ id: string }>()
@@ -32,356 +28,190 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showVideo, setShowVideo] = useState(false)
-  const [videoSrc, setVideoSrc] = useState<string>('')
+  const [videoSrc, setVideoSrc] = useState('')
   const [detected, setDetected] = useState<{ id: number; name: string; similarity: number }[]>([])
-  const [wsStatus, setWsStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected')
 
   const today = new Date()
-  const monthName = today.toLocaleDateString('en-US', { month: 'long' })
 
-  // WebSocket callbacks
-  const handleStudentDetected = useCallback((student: { id: number; name: string; similarity: number }) => {
-    setDetected((prev) => {
-      if (prev.some((x) => x.id === student.id)) return prev
-      return [...prev, student]
-    })
-    setChecked((prev) => ({ ...prev, [student.id]: true }))
+  const onStudentDetected = useCallback((s: { id: number; name: string; similarity: number }) => {
+    setDetected((prev) => prev.some((x) => x.id === s.id) ? prev : [...prev, s])
+    setChecked((prev) => ({ ...prev, [s.id]: true }))
   }, [])
-
-  const handleFrameUpdate = useCallback((frame: string) => {
-    setVideoSrc(frame)
-  }, [])
-
-  const handleStatusChange = useCallback((msg: string, type: 'info' | 'error') => {
-    if (type === 'error') {
-      toast.error(msg)
-      setWsStatus('error')
-    } else {
-      if (msg.includes('Connected')) setWsStatus('connected')
-      if (msg.includes('Disconnected')) setWsStatus('disconnected')
-    }
+  const onFrameUpdate = useCallback((f: string) => setVideoSrc(f), [])
+  const onStatusChange = useCallback((msg: string, type: 'info' | 'error') => {
+    if (type === 'error') toast.error(msg)
   }, [])
 
   const { isConnected, connect, startStream, stopStream } = useWebSocket({
-    courseId: courseIdNum,
-    onStudentDetected: handleStudentDetected,
-    onFrameUpdate: handleFrameUpdate,
-    onStatusChange: handleStatusChange,
+    courseId: courseIdNum, onStudentDetected, onFrameUpdate, onStatusChange,
   })
 
   useEffect(() => {
-    fetch(`/api/django/api/attendance/${courseId}/`, {
-      credentials: 'include',
-      cache: 'no-store',
-    })
-      .then((r) => r.json())
+    getAttendanceData(courseId)
       .then((d) => {
         setCourse(d.course)
         setStudents(d.students)
-
         const dates: string[] = []
-        for (let i = 1; i <= 7; i++) {
-          const dt = new Date()
-          dt.setDate(dt.getDate() - i)
-          dates.push(dt.toISOString().split('T')[0])
-        }
+        for (let i = 1; i <= 7; i++) { const dt = new Date(); dt.setDate(dt.getDate() - i); dates.push(dt.toISOString().split('T')[0]) }
         setPastDates(dates)
-
-        const initial: Record<number, boolean> = {}
-        d.students.forEach((s: Student) => { initial[s.id] = false })
-        setChecked(initial)
+        const init: Record<number, boolean> = {}
+        d.students.forEach((s) => { init[s.id] = false })
+        setChecked(init)
       })
       .catch(() => toast.error('Failed to load attendance data'))
       .finally(() => setLoading(false))
   }, [courseId])
 
-  const connectWs = () => {
-    setWsStatus('connecting')
-    connect()
-    setShowVideo(true)
-    setTimeout(() => startStream(), 100)
-  }
+  const startWs = () => { connect(); setShowVideo(true); setTimeout(() => startStream(), 150) }
+  const stopWs = () => { stopStream(); setShowVideo(false); setVideoSrc(''); setDetected([]) }
 
-  const stopWs = () => {
-    stopStream()
-    setShowVideo(false)
-    setVideoSrc('')
-    setDetected([])
-  }
-
-  async function submitAttendance(e: React.FormEvent) {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
     try {
-      const body = new URLSearchParams()
-      body.append('csrfmiddlewaretoken', getCsrf())
-      students.forEach((s) => {
-        body.append(String(s.id), checked[s.id] ? 'P' : 'A')
-      })
-
-      const res = await fetch(`/api/django/teacher/attendance/${courseId}/`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'X-CSRFToken': getCsrf(),
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: body.toString(),
-        redirect: 'manual',
-      })
-
-      if (res.ok || res.status === 302 || res.type === 'opaqueredirect') {
-        toast.success('Attendance saved successfully')
-        stopWs()
-        router.push('/teacher')
-      } else {
-        toast.error('Failed to save attendance')
-      }
-    } catch {
-      toast.error('Network error')
-    } finally {
-      setSaving(false)
-    }
+      const statuses: Record<number, 'P' | 'A'> = {}
+      students.forEach((s) => { statuses[s.id] = checked[s.id] ? 'P' : 'A' })
+      const r = await takeAttendance(courseId, statuses)
+      if (r.ok || r.status === 302) { toast.success('Attendance saved'); stopWs(); router.push('/teacher') }
+      else toast.error('Failed to save attendance')
+    } catch { toast.error('Network error') } finally { setSaving(false) }
   }
 
-  function markAllPresent() {
-    setChecked((prev) => {
-      const next = { ...prev }
-      students.forEach((s) => { next[s.id] = true })
-      return next
-    })
-  }
+  const markAll = () => setChecked(() => { const n: Record<number, boolean> = {}; students.forEach((s) => { n[s.id] = true }); return n })
 
   const presentCount = Object.values(checked).filter(Boolean).length
   const absentCount = students.length - presentCount
+  const pastStatus = (s: Student, d: string) => s.past_attendance.find((r) => r.date === d)?.status ?? 'NA'
 
-  function getPastStatus(student: Student, dateStr: string): string {
-    const rec = student.past_attendance.find((r) => r.date === dateStr)
-    return rec ? rec.status : 'NA'
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-[#003b5c] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
+  if (loading) return <Spinner />
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#2d3748] flex items-center gap-2">
-            <i className="bx bx-calendar-check text-[#00a4bd]" />
-            Take Attendance
-          </h1>
-          {course && (
-            <div className="mt-1">
-              <h2 className="text-lg font-semibold text-[#003b5c]">{course.title}</h2>
-              <p className="text-sm text-[#4a5568]">
-                {today.getDate()} {monthName} {today.getFullYear()}
-              </p>
-            </div>
+      <Reveal>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-fg tracking-tight flex items-center gap-2"><CalendarCheck className="w-6 h-6 text-accent" />Take Attendance</h1>
+            {course && <p className="text-muted text-sm mt-1"><span className="font-semibold text-fg">{course.title}</span> · {today.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
+          </div>
+          {!showVideo ? (
+            <Button onClick={startWs} icon={<Camera className="w-4 h-4" />}>Start Video Attendance</Button>
+          ) : (
+            <Button variant="danger" onClick={stopWs} icon={<X className="w-4 h-4" />}>Close Camera</Button>
           )}
         </div>
+      </Reveal>
 
-        {/* Video Attendance Button */}
-        {!showVideo ? (
-          <button
-            onClick={connectWs}
-            disabled={isConnected}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#003b5c] text-white text-sm font-medium rounded-input hover:bg-[#002d47] disabled:opacity-60 transition-colors"
-          >
-            {!isConnected && !showVideo ? (
-              <i className="bx bx-camera" />
-            ) : (
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            )}
-            Start Video Attendance
-          </button>
-        ) : (
-          <button
-            onClick={stopWs}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#e31837] text-white text-sm font-medium rounded-input hover:bg-red-700 transition-colors"
-          >
-            <i className="bx bx-x" />
-            Close Camera
-          </button>
-        )}
-      </header>
-
-      {/* Video Feed */}
+      {/* Video feed */}
       {showVideo && (
-        <div className="bg-white rounded-card shadow-sm p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-[#2d3748] flex items-center gap-2">
-              <i className="bx bx-face text-[#00a4bd]" />
-              Face Recognition Attendance
-            </h3>
-            <span className={`text-xs px-3 py-1 rounded-badge font-medium ${
-              isConnected ? 'bg-green-100 text-green-700' : wsStatus === 'error' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-            }`}>
-              {isConnected ? 'Connected' : wsStatus === 'error' ? 'Error' : 'Connecting'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              {videoSrc ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={videoSrc} alt="Video Feed" className="w-full h-auto rounded-input border border-gray-100" />
-              ) : (
-                <div className="w-full h-64 bg-gray-900 rounded-input flex items-center justify-center">
-                  <div className="text-center text-gray-400">
-                    <i className="bx bx-camera text-4xl mb-2 block" />
-                    <p className="text-sm">Initializing camera…</p>
+        <Reveal>
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-fg flex items-center gap-2"><ScanFace className="w-5 h-5 text-accent" />Face Recognition</h3>
+              <Badge tone={isConnected ? 'present' : 'na'}>{isConnected ? 'Connected' : 'Connecting…'}</Badge>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2">
+                {videoSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={videoSrc} alt="Live feed" className="w-full rounded-input border border-border" />
+                ) : (
+                  <div className="w-full aspect-video bg-surface-3 rounded-input flex flex-col items-center justify-center text-muted">
+                    <Camera className="w-10 h-10 mb-2" /><p className="text-sm">Initialising camera…</p>
                   </div>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <h4 className="text-sm font-semibold text-[#2d3748] mb-3">Detected Students</h4>
-              {detected.length === 0 ? (
-                <p className="text-sm text-[#4a5568]">No students detected yet</p>
-              ) : (
-                <div className="space-y-2">
-                  {detected.map((d) => (
-                    <div key={d.id} className="flex items-center gap-2 p-2 bg-green-50 rounded-input border border-green-200">
-                      <i className="bx bx-check-circle text-green-600" />
-                      <div>
-                        <p className="text-sm font-medium text-[#2d3748]">{d.name}</p>
-                        <p className="text-xs text-[#4a5568]">{(d.similarity * 100).toFixed(1)}% match</p>
+                )}
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-fg mb-3">Detected ({detected.length})</h4>
+                {detected.length === 0 ? (
+                  <p className="text-sm text-muted">No students detected yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {detected.map((d) => (
+                      <div key={d.id} className="flex items-center gap-2.5 p-2.5 bg-success-soft rounded-xl">
+                        <CircleCheck className="w-5 h-5 text-success shrink-0" />
+                        <div><p className="text-sm font-medium text-fg">{d.name}</p><p className="text-xs text-muted">{(d.similarity * 100).toFixed(1)}% match</p></div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
+          </Card>
+        </Reveal>
       )}
 
-      <form onSubmit={submitAttendance} className="space-y-4">
+      <form onSubmit={submit} className="space-y-5">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { icon: 'bx-group', label: 'Total Students', value: students.length, color: 'text-[#003b5c]', bg: 'bg-[#003b5c]/10' },
-            { icon: 'bx-user-check', label: 'Present', value: presentCount, color: 'text-green-600', bg: 'bg-green-50' },
-            { icon: 'bx-user-x', label: 'Absent', value: absentCount, color: 'text-red-500', bg: 'bg-red-50' },
-          ].map((s) => (
-            <div key={s.label} className="bg-white rounded-card shadow-sm p-4 flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-input flex items-center justify-center ${s.bg}`}>
-                <i className={`bx ${s.icon} text-xl ${s.color}`} />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-[#2d3748]">{s.value}</p>
-                <p className="text-xs text-[#4a5568]">{s.label}</p>
-              </div>
-            </div>
+            { Icon: Users, color: 'var(--brand)', label: 'Total', value: students.length },
+            { Icon: UserCheck, color: 'var(--success)', label: 'Present', value: presentCount },
+            { Icon: UserX, color: 'var(--danger)', label: 'Absent', value: absentCount },
+          ].map(({ Icon, color, label, value }) => (
+            <Card key={label} className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `color-mix(in srgb, ${color} 14%, transparent)` }}><Icon className="w-5 h-5" style={{ color }} /></div>
+              <div><p className="text-xl font-bold text-fg leading-none">{value}</p><p className="text-xs text-muted mt-0.5">{label}</p></div>
+            </Card>
           ))}
         </div>
 
-        {/* Student Table */}
-        <div className="bg-white rounded-card shadow-sm overflow-hidden">
-          {/* Legend */}
-          <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-4 flex-wrap">
-            <h3 className="text-sm font-semibold text-[#2d3748]">Past Week Attendance</h3>
-            <div className="flex gap-3 text-xs">
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded-full bg-green-400 inline-block" /> Present
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded-full bg-red-400 inline-block" /> Absent
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded-full bg-gray-300 inline-block" /> NA
-              </span>
+        {/* Roster */}
+        <Card className="overflow-hidden">
+          <div className="px-5 py-3 border-b border-border flex items-center gap-4 flex-wrap">
+            <h3 className="text-sm font-bold text-fg">Past Week Attendance</h3>
+            <div className="flex gap-3 text-xs text-muted">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-success" />Present</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-danger" />Absent</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-surface-3" />N/A</span>
             </div>
           </div>
-
-          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-[#4a5568] uppercase tracking-wide min-w-[180px]">Student Name</th>
-                  {pastDates.map((d) => (
-                    <th key={d} className="px-3 py-3 text-xs font-semibold text-[#4a5568] uppercase text-center min-w-[40px]">
-                      {new Date(d + 'T00:00:00').getDate()}
-                    </th>
-                  ))}
-                  <th className="px-5 py-3 text-xs font-semibold text-[#4a5568] uppercase tracking-wide text-center min-w-[120px]">Today</th>
+                <tr style={{ background: 'var(--brand)' }}>
+                  <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-white/85 min-w-[180px]">Student</th>
+                  {pastDates.map((d) => <th key={d} className="px-2 py-3 text-center text-[11px] font-bold uppercase text-white/85 min-w-[40px]">{new Date(d + 'T00:00:00').getDate()}</th>)}
+                  <th className="px-5 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-white/85 min-w-[120px]">Today</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {students.map((student) => (
-                  <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3 font-medium text-[#2d3748]">{student.name}</td>
+              <tbody className="divide-y divide-border">
+                {students.map((s) => (
+                  <tr key={s.id} className="hover:bg-surface-2 transition-colors">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2.5"><Avatar name={s.name} size="sm" className="!w-8 !h-8 !text-[10px]" /><span className="font-medium text-fg">{s.name}</span></div>
+                    </td>
                     {pastDates.map((d) => {
-                      const status = getPastStatus(student, d)
+                      const st = pastStatus(s, d)
                       return (
-                        <td key={d} className="px-3 py-3 text-center">
-                          <span className={`inline-block w-7 h-7 rounded-full text-xs font-medium flex items-center justify-center ${statusColor(status)}`}>
-                            {status === 'NA' ? '—' : status}
+                        <td key={d} className="px-2 py-3 text-center">
+                          <span className={cn('inline-flex w-7 h-7 rounded-full text-xs font-semibold items-center justify-center',
+                            st === 'P' ? 'bg-success-soft text-success' : st === 'A' ? 'bg-danger-soft text-danger' : 'bg-surface-3 text-muted')}>
+                            {st === 'NA' ? '–' : st}
                           </span>
                         </td>
                       )
                     })}
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-center">
-                        <button
-                          type="button"
-                          onClick={() => setChecked((prev) => ({ ...prev, [student.id]: !prev[student.id] }))}
-                          className={`relative inline-flex items-center gap-2 px-4 py-1.5 rounded-badge text-xs font-semibold transition-all ${
-                            checked[student.id]
-                              ? 'bg-green-100 text-green-700 border border-green-300'
-                              : 'bg-red-50 text-red-500 border border-red-200'
-                          }`}
-                        >
-                          <i className={`bx ${checked[student.id] ? 'bx-check' : 'bx-x'}`} />
-                          {checked[student.id] ? 'Present' : 'Absent'}
-                        </button>
-                      </div>
+                    <td className="px-5 py-3 text-center">
+                      <button type="button" onClick={() => setChecked((p) => ({ ...p, [s.id]: !p[s.id] }))}
+                        className={cn('inline-flex items-center gap-1.5 px-4 py-1.5 rounded-badge text-xs font-semibold border transition-all',
+                          checked[s.id] ? 'bg-success-soft text-success border-success/40' : 'bg-danger-soft text-danger border-danger/30')}>
+                        {checked[s.id] ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
+                        {checked[s.id] ? 'Present' : 'Absent'}
+                      </button>
                     </td>
                   </tr>
                 ))}
                 {students.length === 0 && (
-                  <tr>
-                    <td colSpan={pastDates.length + 2} className="px-5 py-10 text-center text-[#4a5568] text-sm">
-                      No students enrolled in this course.
-                    </td>
-                  </tr>
+                  <tr><td colSpan={pastDates.length + 2} className="px-5 py-10 text-center text-muted text-sm">No students enrolled in this course.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
 
-        {/* Actions */}
         <div className="flex gap-3 justify-end">
-          <button
-            type="button"
-            onClick={markAllPresent}
-            className="flex items-center gap-2 px-5 py-2.5 border border-[#003b5c] text-[#003b5c] text-sm font-medium rounded-input hover:bg-[#003b5c]/5 transition-colors"
-          >
-            <i className="bx bx-check-double" />
-            Mark All Present
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#003b5c] text-white text-sm font-medium rounded-input hover:bg-[#002d47] disabled:opacity-60 transition-colors"
-          >
-            {saving ? (
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <i className="bx bx-save" />
-            )}
-            Save Attendance
-          </button>
+          <Button type="button" variant="secondary" onClick={markAll} icon={<CheckCheck className="w-4 h-4" />}>Mark All Present</Button>
+          <Button type="submit" loading={saving} icon={<Save className="w-4 h-4" />}>Save Attendance</Button>
         </div>
       </form>
     </div>

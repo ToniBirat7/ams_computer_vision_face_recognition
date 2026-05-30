@@ -2,6 +2,7 @@
 
 import { getCsrfToken } from '@/lib/utils'
 import type {
+  Student, Teacher, Course,
   StudentDetail, UpdateStudentPayload, ApiStatus, ApiSuccess,
   TeacherDetail, UpdateTeacherPayload,
   StudentReport, PredictionResult,
@@ -153,5 +154,139 @@ export async function alterAttendance(
     body: JSON.stringify(payload),
   })
   if (!r.ok) throw new Error('Failed to update attendance')
+  return r.json()
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+/** GET the Django root once so the csrftoken cookie is set before a mutation. */
+async function seedCsrf(): Promise<string> {
+  try { await fetch(`${BASE}/`, { credentials: 'include' }) } catch { /* ignore */ }
+  return getCsrfToken()
+}
+
+async function postForm(path: string, body: URLSearchParams): Promise<Response> {
+  const csrf = await seedCsrf()
+  body.append('csrfmiddlewaretoken', csrf)
+  return djangoFetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf },
+    body: body.toString(),
+  })
+}
+
+// ── List fetchers (client) ───────────────────────────────────────────────────
+
+export interface UserOption { id: number; username: string; first_name: string; last_name: string }
+export interface ClassEnrollment {
+  id: number; student_id: number; student_name: string; course_id: number; course_title: string
+}
+export interface AttendanceRecordFull {
+  id: number; student_name: string; student_id: number; course_title: string; date: string; status: 'P' | 'A'
+}
+
+export async function getStudents(): Promise<Student[]> {
+  const r = await djangoFetch('/api/students/'); return (await r.json()).students ?? []
+}
+export async function getTeachers(): Promise<Teacher[]> {
+  const r = await djangoFetch('/api/teachers/'); return (await r.json()).teachers ?? []
+}
+export async function getCourses(): Promise<Course[]> {
+  const r = await djangoFetch('/api/courses/'); return (await r.json()).courses ?? []
+}
+export async function getClasses(): Promise<ClassEnrollment[]> {
+  const r = await djangoFetch('/api/classes/'); return (await r.json()).classes ?? []
+}
+export async function getUsers(): Promise<UserOption[]> {
+  const r = await djangoFetch('/api/users/'); return (await r.json()).users ?? []
+}
+export async function getReviewAttendance(): Promise<AttendanceRecordFull[]> {
+  const r = await djangoFetch('/api/review-attendance/'); return (await r.json()).records ?? []
+}
+export async function getAttendanceRecord(id: number): Promise<AttendanceRecordFull> {
+  const r = await djangoFetch(`/api/attendance-record/${id}/`)
+  if (!r.ok) throw new Error('Record not found')
+  return r.json()
+}
+
+export interface AttendanceData {
+  course: { id: number; title: string; shift: string; shift_display?: string }
+  students: { id: number; name: string; past_attendance: { date: string; status: string }[] }[]
+}
+export async function getAttendanceData(courseId: number | string): Promise<AttendanceData> {
+  const r = await djangoFetch(`/api/attendance/${courseId}/`, { cache: 'no-store' } as RequestInit)
+  if (!r.ok) throw new Error('Failed to load attendance data')
+  return r.json()
+}
+
+// ── Mutations ─────────────────────────────────────────────────────────────────
+
+export async function addStudent(form: {
+  name: string; address: string; age: string; phone_number: string
+}): Promise<ApiSuccess> {
+  const r = await postForm('/student/', new URLSearchParams(form))
+  return r.json()
+}
+
+export async function addCourse(form: {
+  teacher: string; title: string; duration: string; shift: string
+}): Promise<ApiSuccess> {
+  const r = await postForm('/add-course/', new URLSearchParams(form))
+  return r.json()
+}
+
+export async function addTeacher(fields: {
+  teacher: string; address: string; primary_number: string;
+  secondary_number: string; dob: string; sex: string
+}, image: File | null): Promise<Response> {
+  const csrf = await seedCsrf()
+  const body = new FormData()
+  Object.entries(fields).forEach(([k, v]) => body.append(k, v))
+  if (image) body.append('my_image', image)
+  body.append('csrfmiddlewaretoken', csrf)
+  return djangoFetch('/teacher/', { method: 'POST', headers: { 'X-CSRFToken': csrf }, body })
+}
+
+export async function addClass(studentIds: number[], courseId: number): Promise<Response> {
+  const body = new URLSearchParams()
+  studentIds.forEach((id) => body.append('student', String(id)))
+  body.append('course', String(courseId))
+  return postForm('/add-student-class/', body)
+}
+
+export async function registerUser(form: {
+  first_name: string; last_name: string; username: string;
+  email: string; password1: string; password2: string
+}): Promise<Response> {
+  return postForm('/register/', new URLSearchParams(form))
+}
+
+export async function editProfile(form: {
+  email: string; address: string; primary_number: string; secondary_number: string
+}): Promise<Response> {
+  return postForm('/teacher/edit-profile/', new URLSearchParams(form))
+}
+
+export async function takeAttendance(
+  courseId: number | string,
+  statuses: Record<number, 'P' | 'A'>,
+): Promise<Response> {
+  const body = new URLSearchParams()
+  Object.entries(statuses).forEach(([studentId, st]) => body.append(studentId, st))
+  return postForm(`/teacher/attendance/${courseId}/`, body)
+}
+
+export async function deleteCourse(id: number): Promise<Response> {
+  return djangoFetch(`/delete-course/${id}/`, { method: 'POST' })
+}
+
+export async function deleteClass(id: number): Promise<Response> {
+  return djangoFetch(`/delete-class/${id}/`, { method: 'POST' })
+}
+
+export async function getTeacherProfileClient(): Promise<{
+  email: string; address: string; primary_number: string; secondary_number: string
+}> {
+  const r = await djangoFetch('/api/teacher/profile/', { cache: 'no-store' } as RequestInit)
   return r.json()
 }

@@ -1,7 +1,12 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Users, GraduationCap, BookOpen, Plus, ArrowRight, MapPin, Phone } from 'lucide-react'
 import { fetchDashboard } from '@/lib/api-proxy'
 import type { Teacher, Course } from '@/types/api'
+import {
+  Card, StatCard, Avatar, Badge, EmptyState,
+  Reveal, Stagger, StaggerItem,
+} from '@/components/ui'
 
 export default async function AdminDashboardPage() {
   const data = await fetchDashboard()
@@ -10,184 +15,118 @@ export default async function AdminDashboardPage() {
   const { teachers, students, courses, teacher_count, student_count, course_count } = data
 
   return (
-    <div className="space-y-8">
-
-      {/* Page header */}
-      <header>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Overview of BCU AMS activity</p>
-      </header>
+    <div className="space-y-7">
+      <Reveal>
+        <div>
+          <h1 className="text-2xl font-extrabold text-fg tracking-tight">Welcome back, Admin 👋</h1>
+          <p className="text-muted text-sm mt-1">Here&apos;s what&apos;s happening across BCU AMS today.</p>
+        </div>
+      </Reveal>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <StatCard icon="bx bxs-user-detail"  accent="#003b5c" label="Total Teachers" value={teacher_count} />
-        <StatCard icon="bx bxs-graduation"   accent="#00a4bd" label="Total Students" value={student_count} />
-        <StatCard icon="bx bxs-book-open"    accent="#e31837" label="Active Courses" value={course_count}  />
-      </div>
+      <Stagger className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <StaggerItem><StatCard icon={<Users className="w-6 h-6" />}         label="Total Teachers" value={teacher_count} accent="var(--brand)" /></StaggerItem>
+        <StaggerItem><StatCard icon={<GraduationCap className="w-6 h-6" />} label="Total Students" value={student_count} accent="var(--accent)" /></StaggerItem>
+        <StaggerItem><StatCard icon={<BookOpen className="w-6 h-6" />}      label="Active Courses" value={course_count}  accent="var(--danger)" /></StaggerItem>
+      </Stagger>
 
       {/* Teachers */}
-      <SectionCard
-        icon="bx bxs-user-detail"
-        title="Teachers"
-        count={teacher_count}
-        addHref="/admin/teachers/add"
-        addLabel="Add Teacher"
-        viewHref="/admin/teachers"
-      >
+      <Section title="Teachers" count={teacher_count} icon={Users} accent="var(--brand)" addHref="/admin/teachers/add" addLabel="Add Teacher" viewHref="/admin/teachers">
         {teachers.length === 0 ? (
-          <EmptyState icon="bx bxs-user-detail" message="No teachers added yet" action={{ href: '/admin/teachers/add', label: 'Add first teacher' }} />
+          <EmptyState icon={Users} title="No teachers yet" message="Register your first teacher to get started." />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {teachers.map((t) => <TeacherCard key={t.id} teacher={t} />)}
-          </div>
+          <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {teachers.slice(0, 6).map((t) => <StaggerItem key={t.id}><TeacherCard teacher={t} /></StaggerItem>)}
+          </Stagger>
         )}
-      </SectionCard>
+      </Section>
 
       {/* Students */}
-      <SectionCard
-        icon="bx bxs-graduation"
-        title="Recent Students"
-        count={student_count}
-        addHref="/admin/students/add"
-        addLabel="Add Student"
-        viewHref="/admin/students"
-        accentColor="#00a4bd"
-      >
+      <Section title="Recent Students" count={student_count} icon={GraduationCap} accent="var(--accent)" addHref="/admin/students/add" addLabel="Add Student" viewHref="/admin/students">
         {students.length === 0 ? (
-          <EmptyState icon="bx bxs-graduation" message="No students added yet" action={{ href: '/admin/students/add', label: 'Add first student' }} />
+          <EmptyState icon={GraduationCap} title="No students yet" message="Register your first student to get started." />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-1">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ background: '#003b5c' }}>
-                  {['#', 'Name', 'Age', 'Address', 'Phone'].map((h) => (
-                    <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-white/80 uppercase tracking-wider">{h}</th>
+                <tr style={{ background: 'var(--brand)' }}>
+                  {['#', 'Name', 'Age', 'Address', 'Phone'].map((h, i) => (
+                    <th key={h} className={`px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-white/85 text-left ${i === 0 ? 'rounded-l-xl' : ''} ${i === 4 ? 'rounded-r-xl' : ''}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {students.map((s, i) => (
-                  <tr key={s.id} className={`hover:bg-gray-50 transition-colors ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
-                    <td className="px-5 py-3.5 text-gray-400 text-xs font-mono">#{s.id}</td>
-                    <td className="px-5 py-3.5 font-medium text-gray-900">{s.name}</td>
-                    <td className="px-5 py-3.5 text-gray-500">{s.age}</td>
-                    <td className="px-5 py-3.5 text-gray-500">{s.address}</td>
-                    <td className="px-5 py-3.5 text-gray-500">{s.phone_number}</td>
+              <tbody className="divide-y divide-border">
+                {students.slice(0, 6).map((s) => (
+                  <tr key={s.id} className="hover:bg-surface-2 transition-colors">
+                    <td className="px-5 py-3 text-muted text-xs font-mono">#{s.id}</td>
+                    <td className="px-5 py-3 font-semibold text-fg">{s.name}</td>
+                    <td className="px-5 py-3 text-fg-soft">{s.age}</td>
+                    <td className="px-5 py-3 text-fg-soft">{s.address}</td>
+                    <td className="px-5 py-3 text-fg-soft">{s.phone_number}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </SectionCard>
+      </Section>
 
       {/* Courses */}
-      <SectionCard
-        icon="bx bxs-book-open"
-        title="Active Courses"
-        count={course_count}
-        addHref="/admin/courses/add"
-        addLabel="Add Course"
-        viewHref="/admin/courses"
-        accentColor="#e31837"
-      >
+      <Section title="Active Courses" count={course_count} icon={BookOpen} accent="var(--danger)" addHref="/admin/courses/add" addLabel="Add Course" viewHref="/admin/courses">
         {courses.length === 0 ? (
-          <EmptyState icon="bx bxs-book-open" message="No courses added yet" action={{ href: '/admin/courses/add', label: 'Add first course' }} />
+          <EmptyState icon={BookOpen} title="No courses yet" message="Create your first course to get started." />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {courses.map((c) => <CourseCard key={c.id} course={c} />)}
-          </div>
+          <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {courses.slice(0, 8).map((c) => <StaggerItem key={c.id}><CourseCard course={c} /></StaggerItem>)}
+          </Stagger>
         )}
-      </SectionCard>
-
+      </Section>
     </div>
   )
 }
 
-// ── Components ──────────────────────────────────────────────────────────────────
-
-function StatCard({ icon, accent, label, value }: {
-  icon: string; accent: string; label: string; value: number
+function Section({ title, count, icon: Icon, accent, addHref, addLabel, viewHref, children }: {
+  title: string; count: number; icon: typeof Users; accent: string
+  addHref: string; addLabel: string; viewHref: string; children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-card shadow-sm p-6 flex items-center gap-5 border-l-4" style={{ borderLeftColor: accent }}>
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${accent}18` }}>
-        <i className={`${icon} text-2xl`} style={{ color: accent }} />
-      </div>
-      <div>
-        <p className="text-3xl font-bold text-gray-900 leading-none">{value}</p>
-        <p className="text-sm text-gray-500 mt-1">{label}</p>
-      </div>
-    </div>
-  )
-}
-
-function SectionCard({ icon, title, count, addHref, addLabel, viewHref, accentColor = '#003b5c', children }: {
-  icon: string; title: string; count: number; addHref: string; addLabel: string;
-  viewHref: string; accentColor?: string; children: React.ReactNode
-}) {
-  return (
-    <section className="bg-white rounded-card shadow-sm overflow-hidden">
-      {/* Section header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accentColor}15` }}>
-            <i className={`${icon} text-base`} style={{ color: accentColor }} />
+    <Reveal>
+      <Card>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)` }}>
+              <Icon className="w-[18px] h-[18px]" style={{ color: accent }} />
+            </div>
+            <div>
+              <h2 className="font-bold text-fg text-sm">{title}</h2>
+              <p className="text-xs text-muted">{count} total</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-semibold text-gray-900 text-sm">{title}</h2>
-            <p className="text-xs text-gray-400">{count} total</p>
+          <div className="flex items-center gap-2">
+            <Link href={viewHref} className="hidden sm:inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors px-2 py-1">
+              View all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+            <Link href={addHref} className="inline-flex items-center gap-1.5 px-3 py-2 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity" style={{ background: accent }}>
+              <Plus className="w-4 h-4" /> {addLabel}
+            </Link>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href={viewHref} className="text-xs text-gray-400 hover:text-gray-700 transition-colors px-2 py-1">
-            View all →
-          </Link>
-          <Link
-            href={addHref}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-semibold rounded-lg transition-colors hover:opacity-90"
-            style={{ background: accentColor }}
-          >
-            <i className="bx bx-plus text-sm" />
-            {addLabel}
-          </Link>
-        </div>
-      </div>
-      {/* Section body */}
-      <div className="p-5">{children}</div>
-    </section>
+        <div className="p-5">{children}</div>
+      </Card>
+    </Reveal>
   )
 }
 
 function TeacherCard({ teacher }: { teacher: Teacher }) {
   return (
-    <Link
-      href={`/admin/teachers/${teacher.id}`}
-      className="bg-white border border-gray-100 rounded-card overflow-hidden hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 block"
-    >
-      <div className="h-36 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #003b5c, #00a4bd)' }}>
-        {teacher.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/media${teacher.image_url}`} alt={`${teacher.first_name} ${teacher.last_name}`} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <i className="bx bxs-user text-5xl text-white/30" />
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-gray-900 text-sm">{teacher.first_name} {teacher.last_name}</h3>
-        <div className="mt-2 space-y-1">
-          {teacher.primary_number && (
-            <p className="flex items-center gap-1.5 text-xs text-gray-500">
-              <i className="bx bx-phone text-secondary" />{teacher.primary_number}
-            </p>
-          )}
-          {teacher.address && (
-            <p className="flex items-center gap-1.5 text-xs text-gray-500 truncate">
-              <i className="bx bx-map text-secondary" />{teacher.address}
-            </p>
-          )}
+    <Link href={`/admin/teachers/${teacher.id}`} className="block border border-border rounded-card overflow-hidden hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 bg-surface">
+      <div className="h-24 relative" style={{ background: 'linear-gradient(135deg, var(--brand), var(--accent))' }} />
+      <div className="px-4 pb-4 -mt-8">
+        <Avatar name={`${teacher.first_name} ${teacher.last_name}`} src={teacher.image_url ? `/media${teacher.image_url}` : null} size="md" className="ring-4 ring-[color:var(--surface)]" />
+        <h3 className="font-semibold text-fg text-sm mt-2.5">{teacher.first_name} {teacher.last_name}</h3>
+        <div className="mt-1.5 space-y-1">
+          {teacher.primary_number && <p className="flex items-center gap-1.5 text-xs text-muted"><Phone className="w-3.5 h-3.5 text-accent" />{teacher.primary_number}</p>}
+          {teacher.address && <p className="flex items-center gap-1.5 text-xs text-muted truncate"><MapPin className="w-3.5 h-3.5 text-accent" />{teacher.address}</p>}
         </div>
       </div>
     </Link>
@@ -195,35 +134,19 @@ function TeacherCard({ teacher }: { teacher: Teacher }) {
 }
 
 function CourseCard({ course }: { course: Course }) {
-  const shift = course.shift_display ?? (course.shift === 'M' ? 'Morning' : course.shift === 'A' ? 'Afternoon' : 'Evening')
-  const shiftColor = course.shift === 'M' ? '#f59e0b' : course.shift === 'A' ? '#3b82f6' : '#8b5cf6'
+  const shift = course.shift_display ?? (course.shift === 'M' ? 'Morning' : 'Day')
+  const tone = course.shift === 'M' ? 'morning' : 'day'
   return (
-    <div className="border border-gray-100 rounded-card p-5 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+    <div className="border border-border rounded-card p-5 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 bg-surface">
       <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#003b5c15' }}>
-          <i className="bx bx-book-open text-base text-primary" />
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-brand-soft">
+          <BookOpen className="w-[18px] h-[18px] text-brand" />
         </div>
-        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg" style={{ background: `${shiftColor}20`, color: shiftColor }}>
-          {shift}
-        </span>
+        <Badge tone={tone as 'morning' | 'day'}>{shift}</Badge>
       </div>
-      <h3 className="font-semibold text-gray-900 text-sm mb-1">{course.title}</h3>
-      <p className="text-xs text-gray-400">{course.teacher_name ?? 'No teacher'}</p>
-      {course.duration && <p className="text-xs text-gray-400 mt-0.5">{course.duration} weeks</p>}
-    </div>
-  )
-}
-
-function EmptyState({ icon, message, action }: {
-  icon: string; message: string; action?: { href: string; label: string }
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 gap-3">
-      <i className={`${icon} text-4xl text-gray-200`} />
-      <p className="text-gray-400 text-sm">{message}</p>
-      {action && (
-        <Link href={action.href} className="text-xs text-secondary hover:underline">{action.label}</Link>
-      )}
+      <h3 className="font-semibold text-fg text-sm">{course.title}</h3>
+      <p className="text-xs text-muted mt-1">{course.teacher_name ?? 'Unassigned'}</p>
+      {course.duration ? <p className="text-xs text-muted mt-0.5">{course.duration} weeks</p> : null}
     </div>
   )
 }

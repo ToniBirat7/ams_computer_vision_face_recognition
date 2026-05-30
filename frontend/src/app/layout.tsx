@@ -1,30 +1,29 @@
 import type { Metadata } from 'next'
-import { Toaster } from 'react-hot-toast'
+import { Plus_Jakarta_Sans } from 'next/font/google'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
+import { ThemedToaster } from '@/components/providers/ThemedToaster'
 import './globals.css'
 
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
-  title: 'BCU AMS',
-  description: 'BCU Attendance Management System',
+  title: 'BCU AMS — Attendance Management',
+  description: 'Birmingham City University Kathmandu · Attendance Management System',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning className={jakarta.variable}>
       <body>
-        {children}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              fontFamily: "'Poppins', sans-serif",
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            },
-            success: { iconTheme: { primary: '#38a169', secondary: '#fff' } },
-            error:   { iconTheme: { primary: '#e53e3e', secondary: '#fff' } },
-          }}
-        />
+        <ThemeProvider>
+          {children}
+          <ThemedToaster />
+        </ThemeProvider>
       </body>
     </html>
   )

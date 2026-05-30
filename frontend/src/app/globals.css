@@ -1,101 +1,161 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
-@import url('https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css');
-@import url('https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+/* ──────────────────────────────────────────────────────────────────────────
+   Design tokens — semantic colours as CSS variables, themed light + dark.
+   Tailwind utilities (bg-surface, text-fg, border-border, …) map to these
+   in tailwind.config.ts, so everything switches with the `.dark` class.
+   ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --primary:        #003b5c;
-  --secondary:      #00a4bd;
-  --accent:         #e31837;
-  --background:     #f5f7fa;
-  --text-primary:   #2d3748;
-  --text-secondary: #4a5568;
-  --white:          #ffffff;
-  --error:          #e53e3e;
-  --success:        #38a169;
-  --warning:        #f6ad55;
-  --shadow-sm:      0 2px 4px rgba(0,0,0,0.1);
-  --shadow-md:      0 4px 6px rgba(0,0,0,0.1);
-  --shadow-lg:      0 10px 15px rgba(0,0,0,0.1);
-  --transition-fast:   0.2s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow:   0.5s ease;
-  --sidebar-width:     280px;
-  --sidebar-collapsed: 80px;
-  --nav-height:        70px;
-  --hover-bg:          rgba(0, 164, 189, 0.1);
-  --border:            rgba(0, 0, 0, 0.1);
+  --bg:          #f5f7fb;
+  --surface:     #ffffff;
+  --surface-2:   #eef2f8;
+  --surface-3:   #e4eaf3;
+  --border:      #e3e8f0;
+  --border-strong:#d2dae6;
+  --fg:          #0f1b2d;
+  --fg-soft:     #33425a;
+  --muted:       #64748b;
+
+  --brand:       #003b5c;
+  --brand-strong:#002a43;
+  --brand-fg:    #ffffff;
+  --accent:      #00a4bd;
+  --accent-strong:#0090a6;
+  --danger:      #e31837;
+  --success:     #16a34a;
+  --warning:     #f59e0b;
+
+  /* soft tints for icon chips / subtle fills */
+  --brand-soft:   rgba(0, 59, 92, 0.10);
+  --accent-soft:  rgba(0, 164, 189, 0.12);
+  --danger-soft:  rgba(227, 24, 55, 0.10);
+  --success-soft: rgba(22, 163, 74, 0.12);
+  --warning-soft: rgba(245, 158, 11, 0.14);
+
+  /* sidebar is dark navy in BOTH themes (Modern-SaaS signature) */
+  --sidebar-bg:     #04263c;
+  --sidebar-bg-2:   #03334f;
+  --sidebar-fg:     rgba(255, 255, 255, 0.72);
+  --sidebar-fg-dim: rgba(255, 255, 255, 0.40);
+  --sidebar-active: rgba(255, 255, 255, 0.12);
+
+  --ring: rgba(0, 164, 189, 0.35);
+  --shadow-color: 220 40% 30%;
+}
+
+.dark {
+  --bg:          #0a1018;
+  --surface:     #121a26;
+  --surface-2:   #18222f;
+  --surface-3:   #202d3d;
+  --border:      #243044;
+  --border-strong:#30405a;
+  --fg:          #e8eef7;
+  --fg-soft:     #c2cedd;
+  --muted:       #8ea0b8;
+
+  --brand:       #2b6f97;
+  --brand-strong:#1d597d;
+  --brand-fg:    #ffffff;
+  --accent:      #2cc4dd;
+  --accent-strong:#46d0e6;
+  --danger:      #f0506a;
+  --success:     #34d399;
+  --warning:     #fbbf24;
+
+  --brand-soft:   rgba(43, 111, 151, 0.20);
+  --accent-soft:  rgba(44, 196, 221, 0.16);
+  --danger-soft:  rgba(240, 80, 106, 0.16);
+  --success-soft: rgba(52, 211, 153, 0.16);
+  --warning-soft: rgba(251, 191, 36, 0.16);
+
+  --sidebar-bg:     #050d16;
+  --sidebar-bg-2:   #0a1a28;
+  --sidebar-fg:     rgba(255, 255, 255, 0.70);
+  --sidebar-fg-dim: rgba(255, 255, 255, 0.38);
+  --sidebar-active: rgba(255, 255, 255, 0.10);
+
+  --ring: rgba(44, 196, 221, 0.40);
+  --shadow-color: 220 60% 2%;
 }
 
 *,
 *::before,
 *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Poppins', sans-serif;
-  background: var(--background);
-  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
   min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar       { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-/* Login animations */
-@keyframes wave-animation {
-  0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-  50%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-}
-@keyframes float {
-  0%,100% { transform: translateY(0px);   }
-  50%     { transform: translateY(-10px); }
-}
+/* ── Keyframes ─────────────────────────────────────────────────────────── */
+@keyframes fadeIn   { from { opacity: 0 } to { opacity: 1 } }
+@keyframes scaleIn  { from { opacity: 0; transform: scale(.96) } to { opacity: 1; transform: scale(1) } }
+@keyframes shimmer  { 100% { transform: translateX(100%) } }
+@keyframes spin     { to { transform: rotate(360deg) } }
 
-/* General animations */
-@keyframes slideIn {
-  from { opacity:0; transform:translateX(20px);  }
-  to   { opacity:1; transform:translateX(0);     }
+/* Shimmer skeleton */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
 }
-@keyframes slideInLeft {
-  from { opacity:0; transform:translateX(-20px); }
-  to   { opacity:1; transform:translateX(0);     }
-}
-@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-@keyframes scaleIn { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
-@keyframes shimmer {
-  0%   { background-position:-200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes ripple-anim { to { transform:scale(4); opacity:0; } }
-
-/* Utility classes */
-.card-hover {
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-}
-.card-hover:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-
-.ripple-container { position:relative; overflow:hidden; }
-.ripple {
-  position:absolute; border-radius:50%;
-  background:rgba(255,255,255,0.3); transform:scale(0);
-  animation:ripple-anim 0.6s linear; pointer-events:none;
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--surface-3) 70%, transparent),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
 }
 
-.status-present { background:rgba(52,211,153,0.15); color:#059669; }
-.status-absent  { background:rgba(239,68,68,0.15);  color:#dc2626; }
-.status-na      { background:rgba(156,163,175,0.15); color:#6b7280; }
+/* Utility: focus ring */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
 
-.animate__animated { --animate-duration: 0.4s; }
+/* react-select theming hooks (used by classes/add) */
+.rs__control {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  border-radius: 10px !important;
+  min-height: 46px !important;
+  box-shadow: none !important;
+}
+.rs__control--is-focused { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--ring) !important; }
+.rs__menu { background: var(--surface) !important; border: 1px solid var(--border) !important; border-radius: 10px !important; overflow: hidden; z-index: 30 !important; }
+.rs__option { background: transparent !important; color: var(--fg) !important; }
+.rs__option--is-focused { background: var(--accent-soft) !important; }
+.rs__multi-value { background: var(--brand) !important; border-radius: 99px !important; }
+.rs__multi-value__label { color: #fff !important; font-size: 12px !important; padding: 2px 4px 2px 8px !important; }
+.rs__multi-value__remove { color: #fff !important; border-radius: 0 99px 99px 0 !important; }
+.rs__multi-value__remove:hover { background: var(--brand-strong) !important; color: #fff !important; }
+.rs__input-color { color: var(--fg) !important; }
+.rs__placeholder { color: var(--muted) !important; }
+.rs__single-value { color: var(--fg) !important; }
