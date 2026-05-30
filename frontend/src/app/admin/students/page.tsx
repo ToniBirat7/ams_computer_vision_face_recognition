@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { getStudent, updateStudent, deleteStudent } from '@/lib/api'
 import type { Student } from '@/types/api'
@@ -100,16 +101,29 @@ export default function StudentsListPage() {
     <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-[#2d3748]">Students List</h1>
-        <div className="relative">
-          <i className="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-[#4a5568]" />
-          <input
-            type="text"
-            placeholder="Search students..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-gray-200 rounded-input text-sm outline-none focus:border-[#00a4bd] transition-colors w-64"
-          />
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Students</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{students.length} registered students</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <i className="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <input
+              type="text"
+              placeholder="Search students…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/10 transition-all bg-gray-50 focus:bg-white w-56"
+            />
+          </div>
+          <Link
+            href="/admin/students/add"
+            className="flex items-center gap-1.5 px-4 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap"
+            style={{ background: 'linear-gradient(135deg, #003b5c, #00a4bd)' }}
+          >
+            <i className="bx bx-plus text-base" />
+            Add Student
+          </Link>
         </div>
       </div>
 

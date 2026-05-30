@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils'
 import { logout } from '@/lib/api'
 
 const navLinks = [
-  { href: '/teacher',         icon: 'bx bx-home',    label: 'Dashboard', exact: true },
-  { href: '/teacher/profile', icon: 'bx bx-user',    label: 'Profile',   exact: false },
+  { href: '/teacher',         icon: 'bx bxs-dashboard', label: 'Dashboard', exact: true  },
+  { href: '/teacher/profile', icon: 'bx bx-user',       label: 'Profile',   exact: false },
 ]
 
 export default function TeacherNav() {
@@ -25,78 +25,77 @@ export default function TeacherNav() {
   }
 
   return (
-    <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[var(--border)] shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between h-[70px]">
+    <nav className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <img
-            src="/images/Bcu_Transparent.png"
-            alt="BCU"
-            className="w-10 h-10 object-contain"
-          />
-          <div className="flex gap-1">
-            {['B', 'C', 'U'].map((letter, i) => (
-              <span
-                key={i}
-                className="text-xl font-bold text-primary"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
-                {letter}
-              </span>
-            ))}
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #003b5c, #00a4bd)' }}
+          >
+            <span className="text-white text-[11px] font-bold tracking-wider">BCU</span>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-primary leading-none">BCU Kathmandu</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Teacher Portal</p>
           </div>
         </div>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-input text-sm font-medium transition-all duration-200',
-                isActive(link.href, link.exact)
-                  ? 'text-secondary border-b-2 border-secondary'
-                  : 'text-text-secondary hover:text-secondary hover:bg-[var(--hover-bg)]',
-              )}
-            >
-              <i className={link.icon} />
-              <span>{link.label}</span>
-            </Link>
-          ))}
+        <div className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => {
+            const active = isActive(link.href, link.exact)
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                  active
+                    ? 'bg-secondary/10 text-secondary'
+                    : 'text-gray-500 hover:text-secondary hover:bg-secondary/5',
+                )}
+              >
+                <i className={link.icon} />
+                {link.label}
+              </Link>
+            )
+          })}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-input text-sm font-medium text-text-secondary hover:text-accent hover:bg-red-50 transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all duration-200 ml-1"
           >
             <i className="bx bx-log-out" />
-            <span>Logout</span>
+            Logout
           </button>
         </div>
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden flex flex-col gap-1.5 w-8 h-8 items-center justify-center"
+          className="md:hidden w-9 h-9 flex flex-col gap-1.5 items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
           onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Toggle menu"
         >
-          <span className={cn('w-6 h-0.5 bg-text-primary transition-all', mobileOpen && 'rotate-45 translate-y-2')} />
-          <span className={cn('w-6 h-0.5 bg-text-primary transition-all', mobileOpen && 'opacity-0')} />
-          <span className={cn('w-6 h-0.5 bg-text-primary transition-all', mobileOpen && '-rotate-45 -translate-y-2')} />
+          <span className={cn('w-5 h-0.5 bg-gray-600 transition-all', mobileOpen && 'rotate-45 translate-y-2')} />
+          <span className={cn('w-5 h-0.5 bg-gray-600 transition-all', mobileOpen && 'opacity-0')} />
+          <span className={cn('w-5 h-0.5 bg-gray-600 transition-all', mobileOpen && '-rotate-45 -translate-y-2')} />
         </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-[var(--border)] bg-white px-6 py-4 flex flex-col gap-2">
+        <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 flex flex-col gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
               className={cn(
-                'flex items-center gap-3 px-4 py-3 rounded-input text-sm font-medium',
+                'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors',
                 isActive(link.href, link.exact)
-                  ? 'bg-[var(--hover-bg)] text-secondary'
-                  : 'text-text-secondary hover:bg-gray-50',
+                  ? 'bg-secondary/10 text-secondary'
+                  : 'text-gray-500 hover:bg-gray-50',
               )}
             >
               <i className={link.icon} />
@@ -105,7 +104,7 @@ export default function TeacherNav() {
           ))}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-input text-sm font-medium text-text-secondary hover:bg-red-50 hover:text-accent"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"
           >
             <i className="bx bx-log-out" />
             Logout
