@@ -23,7 +23,8 @@ export function StatCard({
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-[28px] font-extrabold text-fg leading-none tracking-tight">
+        {/* Gold numerals — the BCU navy+gold signal. */}
+        <p className="text-[28px] font-extrabold text-gold leading-none tracking-tight">
           <CountUp value={value} suffix={suffix} />
         </p>
         <p className="text-[13px] text-muted mt-1 truncate">{label}</p>

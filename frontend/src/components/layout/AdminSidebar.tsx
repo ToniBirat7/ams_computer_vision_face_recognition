@@ -86,9 +86,9 @@ export default function AdminSidebar({ isCollapsed, isMobileOpen, onClose }: Pro
                             : 'text-[color:var(--sidebar-fg)] hover:text-white hover:bg-white/[0.06]',
                         )}
                       >
-                        <Icon className={cn('w-[18px] h-[18px] shrink-0', active && 'text-accent')} />
+                        <Icon className={cn('w-[18px] h-[18px] shrink-0', active && 'text-gold')} />
                         {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
-                        {active && !isCollapsed && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />}
+                        {active && !isCollapsed && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-gold" />}
                       </Link>
                       {isCollapsed && (
                         <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">

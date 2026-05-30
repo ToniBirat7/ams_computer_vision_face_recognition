@@ -9,12 +9,19 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { login } from '@/lib/api'
-import { Monogram, ThemeToggle } from '@/components/ui'
+import { Monogram, ThemeToggle, Eyebrow } from '@/components/ui'
 
 const features = [
   { icon: ScanFace,    title: 'AI Face Recognition', desc: 'Auto-mark attendance from live video' },
   { icon: BarChart3,   title: 'Analytics & Reports', desc: 'Excel exports and grade prediction' },
   { icon: ShieldCheck, title: 'Role-based Access',   desc: 'Separate admin and teacher portals' },
+]
+
+// Gold-numeral stat row — the BCU navy+gold signal.
+const stats = [
+  { value: '99%',  label: 'Match accuracy' },
+  { value: '2',    label: 'Capture modes' },
+  { value: '<1s',  label: 'Live detection' },
 ]
 
 export default function LoginPage() {
@@ -45,18 +52,25 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-bg">
-      {/* Left brand panel */}
+      {/* ── Left brand panel — deep navy, editorial ─────────────────────── */}
       <div
         className="hidden lg:flex flex-col justify-between w-[46%] p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(160deg, var(--sidebar-bg-2), var(--sidebar-bg))' }}
+        style={{ background: 'linear-gradient(155deg, #002a52 0%, #001e3c 55%, #001226 100%)' }}
       >
+        {/* faint dot grid */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-70"
-          style={{ backgroundImage: 'radial-gradient(rgba(0,164,189,.14) 1px, transparent 1px)', backgroundSize: '26px 26px' }}
+          className="absolute inset-0 pointer-events-none opacity-60"
+          style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px)', backgroundSize: '26px 26px' }}
         />
+        {/* gold glow, bottom-right */}
         <div
           className="absolute -bottom-32 -right-24 w-[460px] h-[460px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(0,164,189,.18), transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, rgba(200,169,110,.18), transparent 70%)' }}
+        />
+        {/* cyan glow, top-left */}
+        <div
+          className="absolute -top-28 -left-24 w-[360px] h-[360px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(0,181,226,.12), transparent 70%)' }}
         />
 
         <motion.div
@@ -73,29 +87,37 @@ export default function LoginPage() {
         <div className="relative">
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-7"
-            style={{ background: 'rgba(0,164,189,.16)', border: '1px solid rgba(0,164,189,.3)' }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--accent)]" />
-            <span className="text-accent text-xs font-medium tracking-wide">Attendance Management System</span>
+            <Eyebrow className="mb-5">Attendance Management System</Eyebrow>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}
-            className="text-white text-[42px] font-extrabold leading-[1.1] tracking-tight"
+            className="text-white text-[clamp(40px,4.4vw,56px)] font-extrabold leading-[1.02] tracking-tight"
           >
             Smart attendance,<br />
-            <span style={{ background: 'linear-gradient(90deg, var(--accent), #5fe0f4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              zero friction.
-            </span>
+            <span style={{ color: 'var(--gold)' }}>zero friction.</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.24 }}
-            className="text-white/50 text-[15px] leading-relaxed max-w-sm mt-4 mb-9"
+            className="text-white/55 text-[15px] leading-relaxed max-w-sm mt-5 mb-8"
           >
             Automate classroom attendance with face recognition, real-time dashboards, and instant reporting.
           </motion.p>
+
+          {/* gold-numeral stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
+            className="grid grid-cols-3 gap-5 max-w-sm py-6 mb-8 border-y border-white/10"
+          >
+            {stats.map((s) => (
+              <div key={s.label}>
+                <p className="text-[30px] font-extrabold leading-none" style={{ color: 'var(--gold)' }}>{s.value}</p>
+                <p className="text-white/45 text-[11px] mt-2 leading-tight">{s.label}</p>
+              </div>
+            ))}
+          </motion.div>
 
           <div className="space-y-3">
             {features.map((f, i) => {
@@ -104,12 +126,12 @@ export default function LoginPage() {
                 <motion.div
                   key={f.title}
                   initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 + i * 0.08 }}
+                  transition={{ duration: 0.4, delay: 0.38 + i * 0.08 }}
                   className="flex items-center gap-3.5 p-3.5 rounded-2xl"
                   style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)' }}
                 >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,164,189,.18)' }}>
-                    <Icon className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--gold-soft)' }}>
+                    <Icon className="w-5 h-5" style={{ color: 'var(--gold)' }} />
                   </div>
                   <div>
                     <p className="text-white/90 text-sm font-semibold">{f.title}</p>
@@ -124,7 +146,7 @@ export default function LoginPage() {
         <p className="relative text-white/25 text-xs">BCU AMS © {new Date().getFullYear()} · Birmingham City University Kathmandu</p>
       </div>
 
-      {/* Right form panel */}
+      {/* ── Right form panel ────────────────────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 relative">
         <div className="absolute top-5 right-5"><ThemeToggle /></div>
 
@@ -141,10 +163,10 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="w-12 h-1 rounded-full mb-5" style={{ background: 'linear-gradient(90deg, var(--danger), var(--accent))' }} />
-          <p className="text-accent text-xs font-bold tracking-[2px] uppercase mb-2">Secure Portal</p>
+          <div className="w-12 h-1 rounded-full mb-5" style={{ background: 'linear-gradient(90deg, var(--gold), var(--gold-strong))' }} />
+          <Eyebrow className="mb-2.5">Secure Portal</Eyebrow>
           <h2 className="text-[32px] font-extrabold text-fg tracking-tight leading-none">Welcome back</h2>
-          <p className="text-muted text-sm mt-2 mb-8">Sign in to access your dashboard</p>
+          <p className="text-muted text-sm mt-2.5 mb-8">Sign in to access your dashboard</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -181,11 +203,11 @@ export default function LoginPage() {
             <motion.button
               type="submit" disabled={loading}
               whileHover={{ y: -1 }} whileTap={{ y: 0, scale: 0.99 }}
-              className="w-full h-12 rounded-input text-white font-semibold text-sm flex items-center justify-center gap-2 transition-shadow hover:shadow-lg disabled:opacity-70"
-              style={{ background: 'linear-gradient(135deg, var(--brand), var(--accent))' }}
+              className="w-full h-12 rounded-input font-semibold text-sm flex items-center justify-center gap-2 transition-shadow hover:shadow-lg disabled:opacity-70"
+              style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold-strong))', color: 'var(--gold-fg)' }}
             >
               {loading ? (
-                <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Signing in…</>
+                <><span className="w-4 h-4 border-2 border-[color:var(--gold-fg)]/30 border-t-[color:var(--gold-fg)] rounded-full animate-spin" /> Signing in…</>
               ) : (
                 <>Sign In <ArrowRight className="w-[18px] h-[18px]" /></>
               )}

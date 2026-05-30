@@ -4,7 +4,7 @@ import { Users, GraduationCap, BookOpen, Plus, ArrowRight, MapPin, Phone } from 
 import { fetchDashboard } from '@/lib/api-proxy'
 import type { Teacher, Course } from '@/types/api'
 import {
-  Card, StatCard, Avatar, Badge, EmptyState,
+  Card, StatCard, Avatar, Badge, EmptyState, Eyebrow,
   Reveal, Stagger, StaggerItem,
 } from '@/components/ui'
 
@@ -18,6 +18,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-7">
       <Reveal>
         <div>
+          <Eyebrow className="mb-2">Admin Dashboard</Eyebrow>
           <h1 className="text-2xl font-extrabold text-fg tracking-tight">Welcome back, Admin 👋</h1>
           <p className="text-muted text-sm mt-1">Here&apos;s what&apos;s happening across BCU AMS today.</p>
         </div>

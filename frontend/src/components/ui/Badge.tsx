@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-type Tone = 'present' | 'absent' | 'na' | 'brand' | 'accent' | 'neutral' | 'morning' | 'day'
+type Tone = 'present' | 'absent' | 'na' | 'brand' | 'accent' | 'gold' | 'tag' | 'neutral' | 'morning' | 'day'
 
 const tones: Record<Tone, string> = {
   present: 'bg-success-soft text-success',
@@ -8,6 +8,8 @@ const tones: Record<Tone, string> = {
   na:      'bg-surface-3 text-muted',
   brand:   'bg-brand-soft text-brand',
   accent:  'bg-accent-soft text-accent',
+  gold:    'bg-gold-soft text-[color:var(--gold-strong)]',
+  tag:     'bg-accent-soft text-accent',  // cyan category pill (BCU tag)
   neutral: 'bg-surface-2 text-fg-soft',
   morning: 'bg-warning-soft text-warning',
   day:     'bg-accent-soft text-accent',

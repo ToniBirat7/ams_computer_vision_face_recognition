@@ -4,12 +4,16 @@ import { forwardRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'subtle'
+type Variant = 'primary' | 'brand' | 'secondary' | 'ghost' | 'danger' | 'subtle'
 type Size = 'sm' | 'md' | 'lg'
 
 const variants: Record<Variant, string> = {
+  // BCU gold CTA — navy text on gold, the premium institutional signal.
   primary:
-    'text-white shadow-sm hover:shadow-md hover:-translate-y-px bg-[linear-gradient(135deg,var(--brand),var(--accent))]',
+    'text-[color:var(--gold-fg)] bg-gold hover:bg-gold-strong shadow-sm hover:shadow-md hover:-translate-y-px',
+  // Solid navy — for secondary emphasis where gold would compete.
+  brand:
+    'text-brand-fg bg-brand hover:bg-brand-strong shadow-sm hover:shadow-md hover:-translate-y-px',
   secondary:
     'border border-border-strong text-fg-soft bg-surface hover:bg-surface-2',
   ghost:

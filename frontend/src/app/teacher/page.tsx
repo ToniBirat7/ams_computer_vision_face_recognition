@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { BookOpen, Clock, Calendar, Users, CalendarCheck, Download, BookMarked } from 'lucide-react'
 import { fetchTeacherCourses, fetchTeacherProfile } from '@/lib/api-proxy'
 import type { Course } from '@/types/api'
-import { Card, Badge, EmptyState, Reveal, Stagger, StaggerItem } from '@/components/ui'
+import { Card, Badge, EmptyState, Eyebrow, Reveal, Stagger, StaggerItem } from '@/components/ui'
 
 export default async function TeacherDashboardPage() {
   const [coursesData, profile] = await Promise.all([fetchTeacherCourses(), fetchTeacherProfile()])
@@ -16,17 +16,18 @@ export default async function TeacherDashboardPage() {
       <Reveal>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
+            <Eyebrow className="mb-2">Teacher Portal</Eyebrow>
             <h1 className="text-2xl font-extrabold text-fg tracking-tight">Welcome back, {profile.first_name} 👋</h1>
             <p className="text-muted text-sm mt-1">Manage your courses and track attendance.</p>
           </div>
           <div className="flex gap-3">
             <Card className="px-5 py-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-brand-soft flex items-center justify-center"><BookOpen className="w-[18px] h-[18px] text-brand" /></div>
-              <div><p className="text-xl font-bold text-fg leading-none">{courses.length}</p><p className="text-xs text-muted mt-0.5">Courses</p></div>
+              <div><p className="text-xl font-bold text-gold leading-none">{courses.length}</p><p className="text-xs text-muted mt-0.5">Courses</p></div>
             </Card>
             <Card className="px-5 py-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-accent-soft flex items-center justify-center"><Users className="w-[18px] h-[18px] text-accent" /></div>
-              <div><p className="text-xl font-bold text-fg leading-none">{totalStudents}</p><p className="text-xs text-muted mt-0.5">Students</p></div>
+              <div><p className="text-xl font-bold text-gold leading-none">{totalStudents}</p><p className="text-xs text-muted mt-0.5">Students</p></div>
             </Card>
           </div>
         </div>
