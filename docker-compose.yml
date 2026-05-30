@@ -1,0 +1,53 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --save ""
+      --appendonly no
+      --maxmemory 32mb
+      --maxmemory-policy allkeys-lru
+
+  django:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DB_NAME=/app/data/db.sqlite3
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - static_files:/app/staticfiles
+      - media_files:/app/media
+      - sqlite_data:/app/data
+    depends_on:
+      - redis
+    # Uncomment to pass through webcam for face recognition:
+    # devices:
+    #   - /dev/video0:/dev/video0
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      - DJANGO_INTERNAL_URL=http://django:8000
+    depends_on:
+      - django
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_files:/var/www/static:ro
+      - media_files:/var/www/media:ro
+    depends_on:
+      - django
+      - frontend
+
+volumes:
+  static_files:
+  media_files:
+  sqlite_data:
