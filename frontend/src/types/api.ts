@@ -139,20 +139,26 @@ export interface PredictionResult {
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
 
+// Client → server
 export interface WsStartStream {
   type: 'start_stream'
   courseid: number
+}
+
+export interface WsFrame {
+  type: 'frame'
+  data: string // base64 JPEG data URL captured from the browser webcam
 }
 
 export interface WsStopStream {
   type: 'stop_stream'
 }
 
-export type WsClientMessage = WsStartStream | WsStopStream
+export type WsClientMessage = WsStartStream | WsFrame | WsStopStream
 
+// Server → client
 export interface WsStudentDetected {
   type: 'student_detected'
-  frame: string
   student: {
     id: number
     name: string
@@ -160,15 +166,12 @@ export interface WsStudentDetected {
   }
 }
 
-export interface WsFrameUpdate {
-  type: 'frame_update'
-  frame: string
+export interface WsStreamStarted {
+  type: 'stream_started'
 }
 
-export interface WsNoDetected {
-  type: 'no_detected'
-  frame: string
-  recognition_result: string
+export interface WsStreamStopped {
+  type: 'stream_stopped'
 }
 
 export interface WsError {
@@ -176,7 +179,7 @@ export interface WsError {
   message: string
 }
 
-export type WsServerMessage = WsStudentDetected | WsFrameUpdate | WsNoDetected | WsError
+export type WsServerMessage = WsStudentDetected | WsStreamStarted | WsStreamStopped | WsError
 
 // ── Admin Dashboard ───────────────────────────────────────────────────────────
 

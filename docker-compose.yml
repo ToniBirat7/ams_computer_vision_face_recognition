@@ -1,30 +1,17 @@
 services:
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: >
-      redis-server
-      --save ""
-      --appendonly no
-      --maxmemory 32mb
-      --maxmemory-policy allkeys-lru
-
   django:
     build: ./backend
     restart: unless-stopped
     env_file: .env
     environment:
       - DB_NAME=/app/data/db.sqlite3
-      - REDIS_URL=redis://redis:6379
+      # Channels uses an in-process layer (single Daphne, no cross-worker groups).
+      # To scale to multiple workers, run a Redis service and set REDIS_URL —
+      # channels-redis is already bundled and settings switch automatically.
     volumes:
       - static_files:/app/staticfiles
       - media_files:/app/media
       - sqlite_data:/app/data
-    depends_on:
-      - redis
-    # Uncomment to pass through webcam for face recognition:
-    # devices:
-    #   - /dev/video0:/dev/video0
 
   frontend:
     build: ./frontend
