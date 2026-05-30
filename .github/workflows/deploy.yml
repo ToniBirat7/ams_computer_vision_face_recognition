@@ -37,7 +37,7 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           port: 22
           timeout: 30s
-          command_timeout: 15m
+          command_timeout: 20m
           script_stop: true
           script: |
             cd ~/BCU_AMS_CV_Project
@@ -48,27 +48,13 @@ jobs:
             # Pull latest changes from master
             git pull --ff-only origin master
 
-            # ── Backend (Django) ─────────────────────────────────────────
-            source .venv/bin/activate
+            # Build images and restart containers
+            # Uses Docker layer cache — only changed layers rebuild
+            docker compose build
 
-            pip install -r backend/requirements.txt --quiet
+            docker compose up -d
 
-            cd backend
-            python manage.py migrate --noinput
-            python manage.py collectstatic --noinput --clear
-            cd ..
-
-            deactivate
-
-            # ── Frontend (Next.js) ───────────────────────────────────────
-            cd frontend
-            rm -rf node_modules .next
-            npm ci
-            npm run build
-            cd ..
-
-            # ── Restart Services ─────────────────────────────────────────
-            sudo systemctl restart bcuams-django
-            pm2 restart bcuams-frontend || pm2 start npm --name "bcuams-frontend" -- start --prefix frontend
+            # Remove dangling images to keep disk usage low
+            docker image prune -f
 
             echo "✅ BCU AMS deployed successfully at $(date)"

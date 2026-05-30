@@ -26,7 +26,9 @@ export function useWebSocket({
   const [isConnected, setIsConnected] = useState(false)
 
   const connect = useCallback(() => {
-    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL ?? 'ws://127.0.0.1:8000'}/ws/attendance/`
+    const wsUrl = typeof window !== 'undefined'
+      ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/attendance/`
+      : 'ws://127.0.0.1:8000/ws/attendance/'
     const ws = new WebSocket(wsUrl)
     wsRef.current = ws
 
