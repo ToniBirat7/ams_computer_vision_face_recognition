@@ -1,10 +1,9 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
 @import url('https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css');
 @import url('https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
   --primary:        #003b5c;
