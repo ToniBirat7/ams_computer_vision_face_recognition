@@ -9,6 +9,11 @@ COPY . .
 ARG NEXT_PUBLIC_DJANGO_URL=http://django:8000
 ENV NEXT_PUBLIC_DJANGO_URL=$NEXT_PUBLIC_DJANGO_URL
 
+# Cap the Node heap so `next build` can't balloon past the box's RAM budget. Forces
+# earlier GC; keeps the build under ~700 MB on a 1 GB host. Builder stage only —
+# the runtime server.js does not inherit this.
+ENV NODE_OPTIONS="--max-old-space-size=640"
+
 RUN npm run build
 
 
