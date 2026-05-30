@@ -86,10 +86,10 @@ export default function ClassesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-[#4a5568] uppercase tracking-wide">Student</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-[#4a5568] uppercase tracking-wide">Course</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-[#4a5568] uppercase tracking-wide">Actions</th>
+                <tr style={{ background: '#003b5c' }}>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Student</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Course</th>
+                  <th className="text-right px-5 py-3.5 text-xs font-semibold text-white/80 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
