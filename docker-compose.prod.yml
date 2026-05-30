@@ -13,7 +13,5 @@ services:
     cpus: '0.5'
 
   nginx:
-    ports:
-      - "127.0.0.1:8080:80"
     mem_limit: 64m
     cpus: '0.25'
