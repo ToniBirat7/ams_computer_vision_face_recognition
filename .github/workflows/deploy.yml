@@ -1,4 +1,4 @@
-name: Deploy BCU AMS to birat.codes
+name: Deploy BCU AMS to biratcodes.dev
 
 on:
   workflow_dispatch: # Run manually from the Actions tab
@@ -40,21 +40,14 @@ jobs:
           command_timeout: 20m
           script_stop: true
           script: |
-            cd ~/BCU_AMS_CV_Project
+            cd /srv/bcu
 
-            # Stash any local modifications so pull can proceed cleanly
             git stash push --include-untracked -m "pre-deploy-$(date +%s)" || true
-
-            # Pull latest changes from master
             git pull --ff-only origin master
 
-            # Build images and restart containers
-            # Uses Docker layer cache — only changed layers rebuild
-            docker compose build
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-            docker compose up -d
-
-            # Remove dangling images to keep disk usage low
             docker image prune -f
 
-            echo "BCU AMS deployed successfully at $(date)"
+            echo "BCU AMS deployed at $(date)"

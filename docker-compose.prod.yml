@@ -1,0 +1,19 @@
+# Production overrides — use with: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  django:
+    mem_limit: 512m
+    cpus: '1.0'
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_DJANGO_URL: https://bcuams.biratcodes.dev
+    mem_limit: 256m
+    cpus: '0.5'
+
+  nginx:
+    ports:
+      - "127.0.0.1:8080:80"
+    mem_limit: 64m
+    cpus: '0.25'
