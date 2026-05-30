@@ -57,4 +57,4 @@ jobs:
             # Remove dangling images to keep disk usage low
             docker image prune -f
 
-            echo "✅ BCU AMS deployed successfully at $(date)"
+            echo "BCU AMS deployed successfully at $(date)"
