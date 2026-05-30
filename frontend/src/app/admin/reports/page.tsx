@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useTheme } from 'next-themes'
 import { Line } from 'react-chartjs-2'
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
@@ -20,6 +21,12 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const GRADES = ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F']
 
+/** Read a themed CSS variable at runtime (SSR-safe fallback to the BCU value). */
+function cssVar(name: string, fallback: string) {
+  if (typeof document === 'undefined') return fallback
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
+}
+
 export default function StudentReportPage() {
   const [studentId, setStudentId] = useState('')
   const [report, setReport] = useState<StudentReport | null>(null)
@@ -27,6 +34,18 @@ export default function StudentReportPage() {
   const [prevGrade, setPrevGrade] = useState('A')
   const [loading, setLoading] = useState(false)
   const [predLoading, setPredLoading] = useState(false)
+  const { resolvedTheme } = useTheme()
+
+  // BCU-branded, theme-aware chart palette: gold line, navy points, muted grid.
+  // Keyed on resolvedTheme so the colours re-read from CSS vars on theme switch.
+  const c = useMemo(() => ({
+    line:  cssVar('--gold', '#c8a96e'),
+    fill:  cssVar('--gold-soft', 'rgba(200,169,110,0.16)'),
+    point: cssVar('--brand', '#001e3c'),
+    grid:  cssVar('--border', 'rgba(148,163,184,0.15)'),
+    tick:  cssVar('--muted', '#6b6b6b'),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [resolvedTheme])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,9 +69,9 @@ export default function StudentReportPage() {
     datasets: [{
       label: 'Attendance Rate (%)',
       data: report.monthly_attendance.map((m) => m.rate),
-      borderColor: '#00a4bd',
-      backgroundColor: 'rgba(0,164,189,0.12)',
-      tension: 0.4, fill: true, pointBackgroundColor: '#003b5c', pointRadius: 4,
+      borderColor: c.line,
+      backgroundColor: c.fill,
+      tension: 0.4, fill: true, pointBackgroundColor: c.point, pointRadius: 4,
     }],
   } : null
 
@@ -60,14 +79,14 @@ export default function StudentReportPage() {
     responsive: true,
     plugins: { legend: { display: false } },
     scales: {
-      y: { min: 0, max: 100, ticks: { callback: (v: number | string) => `${v}%`, color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.15)' } },
-      x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+      y: { min: 0, max: 100, ticks: { callback: (v: number | string) => `${v}%`, color: c.tick }, grid: { color: c.grid } },
+      x: { ticks: { color: c.tick }, grid: { display: false } },
     },
   }
 
   return (
     <div className="space-y-6">
-      <Reveal><PageHeader title="Student Reports" subtitle="Attendance analytics and AI grade prediction" /></Reveal>
+      <Reveal><PageHeader eyebrow="Analytics" title="Student Reports" subtitle="Attendance analytics and AI grade prediction" /></Reveal>
 
       <Reveal delay={0.05}>
         <Card className="p-5">
@@ -169,7 +188,7 @@ export default function StudentReportPage() {
                       { label: 'Performance', value: prediction.course_performance },
                     ].map((it) => (
                       <div key={it.label} className="text-center">
-                        <p className={it.big ? 'text-3xl font-extrabold text-brand' : 'text-lg font-semibold text-fg'}>{it.value}</p>
+                        <p className={it.big ? 'text-3xl font-extrabold text-gold' : 'text-lg font-semibold text-fg'}>{it.value}</p>
                         <p className="text-xs text-muted mt-0.5">{it.label}</p>
                       </div>
                     ))}
