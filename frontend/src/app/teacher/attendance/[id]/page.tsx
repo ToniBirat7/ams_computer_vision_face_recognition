@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import {
@@ -16,6 +16,9 @@ interface PastRecord { date: string; status: string }
 interface Student { id: number; name: string; past_attendance: PastRecord[] }
 interface CourseInfo { id: number; title: string; shift: string; shift_display?: string }
 
+const CAPTURE_INTERVAL_MS = 350
+const JPEG_QUALITY = 0.6
+
 export default function AttendancePage() {
   const { id: courseId } = useParams<{ id: string }>()
   const router = useRouter()
@@ -28,8 +31,11 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showVideo, setShowVideo] = useState(false)
-  const [videoSrc, setVideoSrc] = useState('')
   const [detected, setDetected] = useState<{ id: number; name: string; similarity: number }[]>([])
+
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
   const today = new Date()
 
@@ -37,13 +43,12 @@ export default function AttendancePage() {
     setDetected((prev) => prev.some((x) => x.id === s.id) ? prev : [...prev, s])
     setChecked((prev) => ({ ...prev, [s.id]: true }))
   }, [])
-  const onFrameUpdate = useCallback((f: string) => setVideoSrc(f), [])
   const onStatusChange = useCallback((msg: string, type: 'info' | 'error') => {
     if (type === 'error') toast.error(msg)
   }, [])
 
-  const { isConnected, connect, startStream, stopStream } = useWebSocket({
-    courseId: courseIdNum, onStudentDetected, onFrameUpdate, onStatusChange,
+  const { isConnected, connect, startStream, sendFrame, stopStream } = useWebSocket({
+    courseId: courseIdNum, onStudentDetected, onStatusChange,
   })
 
   useEffect(() => {
@@ -62,8 +67,64 @@ export default function AttendancePage() {
       .finally(() => setLoading(false))
   }, [courseId])
 
-  const startWs = () => { connect(); setShowVideo(true); setTimeout(() => startStream(), 150) }
-  const stopWs = () => { stopStream(); setShowVideo(false); setVideoSrc(''); setDetected([]) }
+  // Attach the captured webcam stream once the video element is mounted.
+  useEffect(() => {
+    if (showVideo && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current
+    }
+  }, [showVideo])
+
+  // Once the socket is open, start the stream and pump frames from the canvas.
+  useEffect(() => {
+    if (!isConnected || !showVideo) return
+    startStream()
+    const tick = () => {
+      const v = videoRef.current, c = canvasRef.current
+      if (!v || !c || v.readyState < 2 || !v.videoWidth) return
+      c.width = v.videoWidth
+      c.height = v.videoHeight
+      const ctx = c.getContext('2d')
+      if (!ctx) return
+      ctx.drawImage(v, 0, 0, c.width, c.height)
+      sendFrame(c.toDataURL('image/jpeg', JPEG_QUALITY))
+    }
+    const id = setInterval(tick, CAPTURE_INTERVAL_MS)
+    return () => clearInterval(id)
+  }, [isConnected, showVideo, startStream, sendFrame])
+
+  // Release the webcam on unmount.
+  useEffect(() => () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop())
+  }, [])
+
+  const startCamera = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error('Camera not supported in this browser')
+      return
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 }, audio: false,
+      })
+      streamRef.current = stream
+      connect()
+      setShowVideo(true)
+    } catch (err) {
+      const name = (err as DOMException)?.name
+      if (name === 'NotAllowedError' || name === 'SecurityError') toast.error('Camera permission denied')
+      else if (name === 'NotFoundError') toast.error('No camera found')
+      else toast.error('Could not access camera')
+    }
+  }
+
+  const stopCamera = useCallback(() => {
+    stopStream()
+    streamRef.current?.getTracks().forEach((t) => t.stop())
+    streamRef.current = null
+    if (videoRef.current) videoRef.current.srcObject = null
+    setShowVideo(false)
+    setDetected([])
+  }, [stopStream])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,7 +133,7 @@ export default function AttendancePage() {
       const statuses: Record<number, 'P' | 'A'> = {}
       students.forEach((s) => { statuses[s.id] = checked[s.id] ? 'P' : 'A' })
       const r = await takeAttendance(courseId, statuses)
-      if (r.ok || r.status === 302) { toast.success('Attendance saved'); stopWs(); router.push('/teacher') }
+      if (r.ok || r.status === 302) { toast.success('Attendance saved'); stopCamera(); router.push('/teacher') }
       else toast.error('Failed to save attendance')
     } catch { toast.error('Network error') } finally { setSaving(false) }
   }
@@ -94,9 +155,9 @@ export default function AttendancePage() {
             {course && <p className="text-muted text-sm mt-1"><span className="font-semibold text-fg">{course.title}</span> · {today.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
           </div>
           {!showVideo ? (
-            <Button onClick={startWs} icon={<Camera className="w-4 h-4" />}>Start Video Attendance</Button>
+            <Button onClick={startCamera} icon={<Camera className="w-4 h-4" />}>Start Video Attendance</Button>
           ) : (
-            <Button variant="danger" onClick={stopWs} icon={<X className="w-4 h-4" />}>Close Camera</Button>
+            <Button variant="danger" onClick={stopCamera} icon={<X className="w-4 h-4" />}>Close Camera</Button>
           )}
         </div>
       </Reveal>
@@ -111,14 +172,14 @@ export default function AttendancePage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
-                {videoSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={videoSrc} alt="Live feed" className="w-full rounded-input border border-border" />
-                ) : (
-                  <div className="w-full aspect-video bg-surface-3 rounded-input flex flex-col items-center justify-center text-muted">
-                    <Camera className="w-10 h-10 mb-2" /><p className="text-sm">Initialising camera…</p>
-                  </div>
-                )}
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="w-full rounded-input border border-border bg-surface-3 aspect-video object-cover"
+                />
+                <canvas ref={canvasRef} className="hidden" />
               </div>
               <div>
                 <h4 className="text-sm font-semibold text-fg mb-3">Detected ({detected.length})</h4>
