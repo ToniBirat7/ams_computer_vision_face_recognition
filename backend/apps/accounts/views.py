@@ -19,6 +19,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
@@ -175,6 +176,7 @@ def add_student_class(request):
 
 # ── Authentication API endpoints ────────────────────────────────────────────
 
+@csrf_exempt
 def api_login(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
