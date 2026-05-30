@@ -33,6 +33,8 @@ COPY . .
 
 RUN chmod +x entrypoint.sh
 
+RUN python -c "from facenet_pytorch import InceptionResnetV1; InceptionResnetV1(pretrained='casia-webface')"
+
 ENV MPLBACKEND=Agg \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
