@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
@@ -1022,37 +1023,77 @@ def register_user(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+_IMAGE_EXT = {'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp'}
+
+
+def _decode_image_data_url(data_url):
+    """Decode a base64 image data URL → (ContentFile, error). Either may be None.
+
+    Accepts 'data:image/png;base64,XXXX' or a bare base64 string (assumes jpeg).
+    """
+    try:
+        header, b64 = data_url.split(',', 1) if ',' in data_url else ('', data_url)
+        mime = header.split(';')[0].split(':', 1)[1] if ':' in header else 'image/jpeg'
+        raw = base64.b64decode(b64)
+    except Exception:
+        return None, 'Invalid image data'
+    if len(raw) > 2 * 1024 * 1024:
+        return None, 'File size must be less than 2MB'
+    if mime not in _IMAGE_EXT:
+        return None, f'Invalid file type. Allowed: {", ".join(_IMAGE_EXT)}'
+    return ContentFile(raw, name=f'photo.{_IMAGE_EXT[mime]}'), None
+
+
 @api_login_required
 @require_POST
 def add_teacher(request):
-    user_id = request.POST.get('teacher', '').strip()
-    address = request.POST.get('address', '').strip()
-    primary_number = request.POST.get('primary_number', '').strip()
-    secondary_number = request.POST.get('secondary_number', '').strip() or None
-    dob = request.POST.get('dob', '').strip()
-    sex = request.POST.get('sex', 'M').strip()
-    my_image = request.FILES.get('my_image')
+    # Two transports supported. JSON (with a base64 image) is preferred: it travels
+    # reliably through the nginx /api/django proxy. multipart/form-data is kept as a
+    # fallback for older clients. The multipart path was dropping its body through the
+    # proxy, leaving request.POST empty → spurious "Required fields are missing".
+    image_file = None
+    if (request.content_type or '').startswith('application/json'):
+        try:
+            payload = json.loads(request.body or b'{}')
+        except (json.JSONDecodeError, TypeError, ValueError):
+            return JsonResponse({'success': False, 'error': 'Invalid JSON body'}, status=400)
+        user_id = str(payload.get('teacher', '')).strip()
+        address = str(payload.get('address', '')).strip()
+        primary_number = str(payload.get('primary_number', '')).strip()
+        secondary_number = str(payload.get('secondary_number', '')).strip() or None
+        dob = str(payload.get('dob', '')).strip()
+        sex = str(payload.get('sex', 'M')).strip() or 'M'
+        image_data = payload.get('image_data')
+        if image_data:
+            image_file, err = _decode_image_data_url(image_data)
+            if err:
+                return JsonResponse({'success': False, 'error': err}, status=400)
+    else:
+        user_id = request.POST.get('teacher', '').strip()
+        address = request.POST.get('address', '').strip()
+        primary_number = request.POST.get('primary_number', '').strip()
+        secondary_number = request.POST.get('secondary_number', '').strip() or None
+        dob = request.POST.get('dob', '').strip()
+        sex = request.POST.get('sex', 'M').strip() or 'M'
+        my_image = request.FILES.get('my_image')
+        if my_image:
+            if my_image.size > 2 * 1024 * 1024:
+                return JsonResponse({'success': False, 'error': 'File size must be less than 2MB'}, status=400)
+            allowed_mimes = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+            if my_image.content_type not in allowed_mimes:
+                return JsonResponse({'success': False, 'error': f'Invalid file type. Allowed: {", ".join(allowed_mimes)}'}, status=400)
+        image_file = my_image
 
     if not all([user_id, address, primary_number, dob]):
         return JsonResponse({'success': False, 'error': 'Required fields are missing'}, status=400)
 
     try:
         user = User.objects.get(id=int(user_id))
-    except User.DoesNotExist:
+    except (User.DoesNotExist, ValueError):
         return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
 
     if Teacher.objects.filter(user=user).exists():
         return JsonResponse({'success': False, 'error': f'Teacher profile for {user.username} already exists'}, status=400)
-
-    # Validate file upload if provided
-    if my_image:
-        # Check file size (max 2MB)
-        if my_image.size > 2 * 1024 * 1024:
-            return JsonResponse({'success': False, 'error': 'File size must be less than 2MB'}, status=400)
-        # Check MIME type (images only)
-        allowed_mimes = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
-        if my_image.content_type not in allowed_mimes:
-            return JsonResponse({'success': False, 'error': f'Invalid file type. Allowed: {", ".join(allowed_mimes)}'}, status=400)
 
     try:
         Teacher.objects.create(
@@ -1062,7 +1103,7 @@ def add_teacher(request):
             primary_number=primary_number,
             secondary_number=secondary_number,
             sex=sex,
-            image=my_image,
+            image=image_file,
         )
         return JsonResponse({'success': True, 'message': 'Teacher registered successfully'})
     except Exception as e:
