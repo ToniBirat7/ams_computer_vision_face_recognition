@@ -126,6 +126,10 @@ CSRF_TRUSTED_ORIGINS = list(_frontend_urls)
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 
+# A 2 MB image base64-encodes to ~2.7 MB; Django's 2.5 MB default would reject the
+# JSON body before the view runs. Bump to 5 MB (nginx client_max_body_size is 10 MB).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+
 # ── Security (enforced in production) ────────────────────────────────────────
 
 if not DEBUG:

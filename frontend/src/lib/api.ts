@@ -1,6 +1,6 @@
 'use client'
 
-import { getCsrfToken } from '@/lib/utils'
+import { getCsrfToken, fileToDataUrl } from '@/lib/utils'
 import type {
   Student, Teacher, Course,
   StudentDetail, UpdateStudentPayload, ApiStatus, ApiSuccess,
@@ -239,12 +239,16 @@ export async function addTeacher(fields: {
   teacher: string; address: string; primary_number: string;
   secondary_number: string; dob: string; sex: string
 }, image: File | null): Promise<Response> {
+  // Sent as JSON (image as a base64 data URL) rather than multipart/form-data — the
+  // multipart body did not survive the nginx /api/django proxy, so Django saw an empty
+  // POST and rejected every registration. JSON travels reliably (same path as login).
   const csrf = await seedCsrf()
-  const body = new FormData()
-  Object.entries(fields).forEach(([k, v]) => body.append(k, v))
-  if (image) body.append('my_image', image)
-  body.append('csrfmiddlewaretoken', csrf)
-  return djangoFetch('/teacher/', { method: 'POST', headers: { 'X-CSRFToken': csrf }, body })
+  const image_data = image ? await fileToDataUrl(image) : null
+  return djangoFetch('/teacher/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+    body: JSON.stringify({ ...fields, image_data }),
+  })
 }
 
 export async function addClass(studentIds: number[], courseId: number): Promise<Response> {

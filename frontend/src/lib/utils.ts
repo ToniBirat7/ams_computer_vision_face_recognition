@@ -47,3 +47,13 @@ export function getCsrfToken(): string {
   const match = document.cookie.match(/csrftoken=([^;]+)/)
   return match ? match[1] : ''
 }
+
+/** Read a File as a base64 data URL, e.g. "data:image/png;base64,iVBOR…". */
+export function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
+}
