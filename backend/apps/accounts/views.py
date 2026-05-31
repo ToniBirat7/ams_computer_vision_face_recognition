@@ -320,7 +320,7 @@ def update_teacher(request):
         # Update teacher details
         teacher.address = request.POST.get('address')
         teacher.primary_number = request.POST.get('primary_number')
-        teacher.secondary_number = request.POST.get('secondary_number', '')
+        teacher.secondary_number = request.POST.get('secondary_number', '').strip() or None
         teacher.dob = request.POST.get('dob')
         teacher.save()
 
@@ -1028,7 +1028,7 @@ def add_teacher(request):
     user_id = request.POST.get('teacher', '').strip()
     address = request.POST.get('address', '').strip()
     primary_number = request.POST.get('primary_number', '').strip()
-    secondary_number = request.POST.get('secondary_number', '').strip()
+    secondary_number = request.POST.get('secondary_number', '').strip() or None
     dob = request.POST.get('dob', '').strip()
     sex = request.POST.get('sex', 'M').strip()
     my_image = request.FILES.get('my_image')

@@ -54,7 +54,10 @@ export default function AddTeacherPage() {
     try {
       const r = await addTeacher(form, imageFile)
       if (r.ok) { toast.success('Teacher registered'); router.push('/admin/teachers') }
-      else toast.error('Registration failed. Check the form.')
+      else {
+        const data = await r.json().catch(() => ({}))
+        toast.error(data.error || 'Registration failed. Check the form.')
+      }
     } catch { toast.error('Network error') } finally { setLoading(false) }
   }
 
