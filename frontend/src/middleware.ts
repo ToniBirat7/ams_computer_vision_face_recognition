@@ -19,7 +19,9 @@ export async function middleware(req: NextRequest) {
       credentials: 'include',
       headers: {
         'Cookie': req.headers.get('cookie') || '',
+        'X-Forwarded-Proto': 'https',
       },
+      redirect: 'error',
     })
     if (!r.ok) {
       return NextResponse.redirect(new URL('/', req.url))
