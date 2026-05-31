@@ -14,9 +14,11 @@ async function serverFetch(path: string, init: RequestInit = {}): Promise<Respon
       Cookie: `sessionid=${sessionId}; csrftoken=${csrfToken}`,
       'X-CSRFToken': csrfToken,
       'X-Requested-With': 'XMLHttpRequest',
+      'X-Forwarded-Proto': 'https',
       ...init.headers,
     },
     cache: 'no-store',
+    redirect: 'error',
   })
 }
 
