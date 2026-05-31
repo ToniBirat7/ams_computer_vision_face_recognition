@@ -24,7 +24,7 @@ class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.CharField(max_length=30)
     primary_number = models.CharField(max_length=10, validators=[MinLengthValidator(10)],unique=True) 
-    secondary_number = models.CharField(max_length=10, validators=[MinLengthValidator(10)],unique=True) 
+    secondary_number = models.CharField(max_length=10, validators=[MinLengthValidator(10)], unique=True, null=True, blank=True)
     dob = models.DateField(null=True,blank=True)
     sex = models.CharField(max_length=1, choices=Gender)
     image = models.ImageField(upload_to=file_upload, null=True, blank=True)
