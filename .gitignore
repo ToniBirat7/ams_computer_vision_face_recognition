@@ -21,12 +21,11 @@ local_settings.py
 !frontend/.env.local.example
 !backend/.env.example
 
-# Face recognition training data
+# Face recognition training data (raw images — not needed at runtime, embeddings
+# already encode them). The trained .pkl artifacts below ARE tracked: they cannot be
+# regenerated on the deploy host (no training data, no GPU, offline) and the runtime
+# loads them directly (face_recognition/check.py, accounts/views.py predict).
 backend/services/face_recognition/training_data/
-
-# ML model artifacts (regenerate with model_train.py)
-backend/services/face_recognition/embeddings.pkl
-backend/ml_models/
 
 # Next.js
 frontend/.next/
