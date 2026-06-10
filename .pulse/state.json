@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "bcu-ams-cv-project",
+  "name": "BCU AMS CV Project",
+  "description": "A production-grade attendance management system for educational institutions. Features role-based dashboards for Admins and Teachers, manual attendance marking, real-time face recognition attendance via WebSocket video streaming, ML-based g",
+  "status": "active",
+  "statusReason": null,
+  "currentFeature": "ship trained model artifacts so face rec + grade predict work in prod",
+  "currentPhase": "deploy",
+  "milestones": [],
+  "links": [],
+  "prs": [],
+  "_conflicts": [],
+  "repo": {
+    "hasGit": true,
+    "defaultBranch": "master",
+    "currentBranch": "master",
+    "remoteUrl": "github.com/ToniBirat7/AMS_Computer_Vision_BCU",
+    "githubSlug": "ToniBirat7/AMS_Computer_Vision_BCU",
+    "lastCommit": {
+      "sha": "7b58099",
+      "subject": "fix: ship trained model artifacts so face rec + grade predict work in prod",
+      "authoredAt": "2026-06-01T04:58:27+00:00",
+      "ageDays": 9.2
+    },
+    "dirty": true,
+    "ahead": 0,
+    "behind": 0,
+    "ci": "failure"
+  },
+  "branches": [
+    {
+      "name": "master",
+      "lastCommitAt": "2026-06-01T04:58:27+00:00",
+      "ageDays": 9.2,
+      "isCurrent": true,
+      "merged": false,
+      "linkedPrNumber": null
+    },
+    {
+      "name": "backup-before-reset-20260504-131334",
+      "lastCommitAt": "2026-04-07T05:51:47+00:00",
+      "ageDays": 64.1,
+      "isCurrent": false,
+      "merged": false,
+      "linkedPrNumber": null
+    },
+    {
+      "name": "rollback-may31",
+      "lastCommitAt": "2025-12-02T17:11:22+00:00",
+      "ageDays": 189.7,
+      "isCurrent": false,
+      "merged": false,
+      "linkedPrNumber": null
+    }
+  ],
+  "techStack": {
+    "languages": [
+      "Python",
+      "JavaScript",
+      "TypeScript"
+    ],
+    "runtimes": [
+      "node"
+    ],
+    "frameworks": [
+      "Next.js",
+      "React",
+      "Tailwind",
+      "Django"
+    ],
+    "packageManager": "pip",
+    "detectedFrom": [
+      "backend/requirements.txt",
+      "frontend/package.json"
+    ]
+  },
+  "wikiRef": {
+    "present": false,
+    "path": "wiki/",
+    "pages": null,
+    "lastIndexedAt": null
+  },
+  "architecture": {
+    "components": [
+      "backend",
+      "frontend",
+      "nginx"
+    ],
+    "summary": "Django 5 (ASGI/Daphne) API + Next.js 15 frontend + PyTorch/FaceNet, behind nginx; SQLite/Postgres with optional Redis.",
+    "overviewDoc": "overview.md"
+  },
+  "human": {
+    "name": null,
+    "description": null,
+    "architectureSummary": null,
+    "techStackExtra": {
+      "languages": [],
+      "runtimes": [],
+      "frameworks": []
+    },
+    "notes": null,
+    "pinned": false
+  },
+  "metrics": {
+    "openTasks": 0,
+    "doingTasks": 0,
+    "doneTasks": 0,
+    "openPrs": 0,
+    "staleBranches": 2,
+    "commitsLast7d": 0,
+    "commitsLast30d": 22
+  },
+  "generatedAt": "2026-06-10T09:16:58.352731+00:00",
+  "generatedBy": "pulse-bulk@0.1.0"
+}

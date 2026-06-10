@@ -1,0 +1,2 @@
+{"id": "commit:7b58099", "type": "commit", "at": "2026-06-01T04:58:27+00:00", "summary": "fix: ship trained model artifacts so face rec + grade predict work in prod"}
+{"id": "ci:default:7b58099:failure", "type": "ci", "at": "2026-06-10T09:16:58.352538+00:00", "summary": "CI failure on master"}
