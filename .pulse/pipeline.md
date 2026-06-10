@@ -8,5 +8,5 @@
 _How you run, build, test, and ship this project._
 
 <!-- pulse:auto:start -->
-_machine-generated pipeline summary appears here_
+Build Django + Next.js images -> push artifacts -> deploy to VM behind nginx (localhost:8080) at bcuams.biratcodes.dev; ML models bundled for face-rec + grade prediction.
 <!-- pulse:auto:end -->

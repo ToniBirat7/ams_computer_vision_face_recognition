@@ -1,4 +1,55 @@
 {
   "schemaVersion": 1,
-  "tasks": []
+  "tasks": [
+    {
+      "id": "m:production-deploy-config-nginx-routing",
+      "title": "Production deploy config + nginx routing",
+      "status": "done",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-10T11:00:57.744516+00:00",
+      "updatedAt": "2026-06-10T11:01:09.998411+00:00",
+      "note": null
+    },
+    {
+      "id": "m:fix-teacher-registration-via-json-base64-through",
+      "title": "Fix teacher registration via JSON+base64 through nginx proxy",
+      "status": "done",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-10T11:00:57.744546+00:00",
+      "updatedAt": "2026-06-10T11:01:09.998436+00:00",
+      "note": null
+    },
+    {
+      "id": "m:ship-trained-model-artifacts-so-face-rec-grade-p",
+      "title": "Ship trained model artifacts so face rec + grade predict work in prod",
+      "status": "doing",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-10T11:00:57.744561+00:00",
+      "updatedAt": "2026-06-10T11:01:09.998448+00:00",
+      "note": null
+    },
+    {
+      "id": "m:verify-face-recognition-attendance-via-websocket",
+      "title": "Verify face-recognition attendance via WebSocket in production",
+      "status": "todo",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-10T11:00:57.744586+00:00",
+      "updatedAt": "2026-06-10T11:01:09.998459+00:00",
+      "note": null
+    },
+    {
+      "id": "m:resolve-failing-ci-on-master",
+      "title": "Resolve failing CI on master",
+      "status": "todo",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-10T11:00:57.744594+00:00",
+      "updatedAt": "2026-06-10T11:01:09.998471+00:00",
+      "note": null
+    }
+  ]
 }
