@@ -50,6 +50,36 @@
       "createdAt": "2026-06-10T11:00:57.744594+00:00",
       "updatedAt": "2026-06-10T11:01:09.998471+00:00",
       "note": null
+    },
+    {
+      "id": "m:add-student-face-enrollment-ui-for-registering-n",
+      "title": "Add student face enrollment UI for registering new faces without SSH access",
+      "status": "open",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-20T05:45:20.840813+00:00",
+      "updatedAt": "2026-06-20T05:45:20.840822+00:00",
+      "note": null
+    },
+    {
+      "id": "m:build-teacher-facing-attendance-export-csv-pdf-f",
+      "title": "Build teacher-facing attendance export (CSV/PDF) for reporting",
+      "status": "open",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-20T05:45:20.840834+00:00",
+      "updatedAt": "2026-06-20T05:45:20.840836+00:00",
+      "note": null
+    },
+    {
+      "id": "m:write-playwright-e2e-tests-for-the-full-face-att",
+      "title": "Write Playwright E2E tests for the full face attendance flow (camera → mark → DB)",
+      "status": "open",
+      "source": "machine",
+      "locked": false,
+      "createdAt": "2026-06-20T05:45:20.840847+00:00",
+      "updatedAt": "2026-06-20T05:45:20.840848+00:00",
+      "note": null
     }
   ]
 }

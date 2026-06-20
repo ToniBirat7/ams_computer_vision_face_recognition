@@ -2,17 +2,38 @@
   "schemaVersion": 1,
   "id": "bcu-ams-cv-project",
   "name": "BCU AMS CV Project",
-  "description": "A production-grade attendance management system for educational institutions. Features role-based dashboards for Admins and Teachers, manual attendance marking, real-time face recognition attendance via WebSocket video streaming, ML-based g",
+  "description": "A production-grade attendance management system for educational institutions. Features role-based dashboards for Admins and Teachers, manual attendance marking, real-time face recognition attendance via WebSocket video streaming, ML-based grade prediction, and a BCU navy+gold design system.",
   "status": "active",
   "statusReason": null,
-  "currentFeature": "ship trained model artifacts so face rec + grade predict work in prod",
-  "currentPhase": "deploy",
+  "currentFeature": "Browser-camera face recognition attendance via WebSocket video streaming",
+  "currentPhase": "polish",
   "milestones": [
     {
       "id": "m:production-launch-bcuams-biratcodes-dev",
       "title": "Production launch — bcuams.biratcodes.dev",
       "due": null,
       "status": "in_progress",
+      "source": "machine"
+    },
+    {
+      "id": "m:face-recognition-accuracy-95-on-student-roster",
+      "title": "Face recognition accuracy >95% on student roster",
+      "due": null,
+      "status": "pending",
+      "source": "machine"
+    },
+    {
+      "id": "m:admin-reporting-suite-complete",
+      "title": "Admin reporting suite complete",
+      "due": null,
+      "status": "pending",
+      "source": "machine"
+    },
+    {
+      "id": "m:stable-production-release-at-bcuams-biratcodes-d",
+      "title": "Stable production release at bcuams.biratcodes.dev",
+      "due": null,
+      "status": "pending",
       "source": "machine"
     }
   ],
@@ -26,21 +47,21 @@
     "remoteUrl": "github.com/ToniBirat7/AMS_Computer_Vision_BCU",
     "githubSlug": "ToniBirat7/AMS_Computer_Vision_BCU",
     "lastCommit": {
-      "sha": "1faaf99",
-      "subject": "chore(pulse): track .pulse/ project state",
-      "authoredAt": "2026-06-10T09:31:39+00:00",
-      "ageDays": 0.1
+      "sha": "f623bdf",
+      "subject": "chore(pulse): commit tracked .pulse/ project state",
+      "authoredAt": "2026-06-10T18:15:08+00:00",
+      "ageDays": 9.5
     },
     "dirty": true,
-    "ahead": 1,
+    "ahead": 2,
     "behind": 0,
     "ci": "failure"
   },
   "branches": [
     {
       "name": "master",
-      "lastCommitAt": "2026-06-10T09:31:39+00:00",
-      "ageDays": 0.1,
+      "lastCommitAt": "2026-06-10T18:15:08+00:00",
+      "ageDays": 9.5,
       "isCurrent": true,
       "merged": false,
       "linkedPrNumber": null
@@ -48,7 +69,7 @@
     {
       "name": "backup-before-reset-20260504-131334",
       "lastCommitAt": "2026-04-07T05:51:47+00:00",
-      "ageDays": 64.2,
+      "ageDays": 74.0,
       "isCurrent": false,
       "merged": false,
       "linkedPrNumber": null
@@ -56,7 +77,7 @@
     {
       "name": "rollback-may31",
       "lastCommitAt": "2025-12-02T17:11:22+00:00",
-      "ageDays": 189.7,
+      "ageDays": 199.5,
       "isCurrent": false,
       "merged": false,
       "linkedPrNumber": null
@@ -95,8 +116,179 @@
       "frontend",
       "nginx"
     ],
-    "summary": "Attendance management system: Django backend with role-based Admin/Teacher dashboards, real-time face-recognition attendance over WebSocket video, ML grade prediction; Next.js + Tailwind frontend; nginx-fronted prod at bcuams.biratcodes.dev.",
-    "overviewDoc": "overview.md"
+    "summary": "Django + Daphne backend handles WebSocket video frames for real-time face recognition and serves role-based REST APIs for admin and teacher dashboards. Next.js frontend uses the browser MediaStream API to capture and stream camera frames without server-side webcam access. Deployed on bcuams.biratcodes.dev behind nginx with Docker, RAM footprint cut from 544MB to 94MB idle.",
+    "overviewDoc": "overview.md",
+    "graph": {
+      "nodes": [
+        {
+          "id": "browser",
+          "label": "Browser (Next.js Client)",
+          "kind": "frontend"
+        },
+        {
+          "id": "nextjs",
+          "label": "Next.js 15 App (port 3000)",
+          "kind": "frontend"
+        },
+        {
+          "id": "nginx",
+          "label": "nginx Reverse Proxy (port 8080)",
+          "kind": "infra"
+        },
+        {
+          "id": "daphne",
+          "label": "Daphne ASGI Server (port 8000)",
+          "kind": "backend"
+        },
+        {
+          "id": "django-accounts",
+          "label": "Django: apps.accounts",
+          "kind": "backend"
+        },
+        {
+          "id": "django-attendance",
+          "label": "Django: apps.attendance",
+          "kind": "backend"
+        },
+        {
+          "id": "ws-consumer",
+          "label": "VideoAttendanceConsumer (WebSocket)",
+          "kind": "backend"
+        },
+        {
+          "id": "face-rec",
+          "label": "Face Recognition Service (MTCNN+FaceNet)",
+          "kind": "service"
+        },
+        {
+          "id": "grade-ml",
+          "label": "Grade Predictor (scikit-learn .pkl)",
+          "kind": "ml"
+        },
+        {
+          "id": "sqlite",
+          "label": "SQLite / PostgreSQL",
+          "kind": "database"
+        },
+        {
+          "id": "redis",
+          "label": "Redis (optional channel layer)",
+          "kind": "cache"
+        },
+        {
+          "id": "media-vol",
+          "label": "Media Volume (profile photos)",
+          "kind": "store"
+        },
+        {
+          "id": "static-vol",
+          "label": "Static Files Volume",
+          "kind": "store"
+        },
+        {
+          "id": "github-actions",
+          "label": "GitHub Actions CI/CD",
+          "kind": "ci"
+        },
+        {
+          "id": "tailscale",
+          "label": "Tailscale VPN",
+          "kind": "infra"
+        },
+        {
+          "id": "azure-vm",
+          "label": "Azure VM (biratcodes.dev)",
+          "kind": "deploy"
+        }
+      ],
+      "edges": [
+        {
+          "from": "browser",
+          "to": "nextjs",
+          "label": "HTTP/WS"
+        },
+        {
+          "from": "nextjs",
+          "to": "nginx",
+          "label": "proxied in prod"
+        },
+        {
+          "from": "nginx",
+          "to": "daphne",
+          "label": "REST /api/django + WS /ws/"
+        },
+        {
+          "from": "nginx",
+          "to": "nextjs",
+          "label": "/ all routes"
+        },
+        {
+          "from": "nextjs",
+          "to": "daphne",
+          "label": "rewrites /api/django (dev)"
+        },
+        {
+          "from": "daphne",
+          "to": "django-accounts",
+          "label": "HTTP → views"
+        },
+        {
+          "from": "daphne",
+          "to": "ws-consumer",
+          "label": "WS /ws/attendance/"
+        },
+        {
+          "from": "ws-consumer",
+          "to": "face-rec",
+          "label": "calls take_face()"
+        },
+        {
+          "from": "django-accounts",
+          "to": "grade-ml",
+          "label": "predict_performance"
+        },
+        {
+          "from": "django-accounts",
+          "to": "sqlite",
+          "label": "ORM reads/writes"
+        },
+        {
+          "from": "django-attendance",
+          "to": "sqlite",
+          "label": "ORM reads/writes"
+        },
+        {
+          "from": "ws-consumer",
+          "to": "sqlite",
+          "label": "StudentClass lookup"
+        },
+        {
+          "from": "ws-consumer",
+          "to": "redis",
+          "label": "channel layer (optional)"
+        },
+        {
+          "from": "django-accounts",
+          "to": "media-vol",
+          "label": "stores profile photos"
+        },
+        {
+          "from": "nginx",
+          "to": "static-vol",
+          "label": "serves static"
+        },
+        {
+          "from": "github-actions",
+          "to": "tailscale",
+          "label": "SSH over VPN"
+        },
+        {
+          "from": "tailscale",
+          "to": "azure-vm",
+          "label": "deploy docker compose"
+        }
+      ]
+    }
   },
   "human": {
     "name": null,
@@ -116,20 +308,10 @@
     "doneTasks": 2,
     "openPrs": 0,
     "staleBranches": 2,
-    "commitsLast7d": 1,
-    "commitsLast30d": 23,
-    "progress": 70,
+    "commitsLast7d": 0,
+    "commitsLast30d": 22,
+    "progress": 40,
     "activityDaily": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
       0,
       0,
       0,
@@ -209,10 +391,20 @@
       0,
       0,
       0,
-      1
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
     ],
-    "activityFrom": "2026-03-13",
-    "activityTotal90d": 29,
+    "activityFrom": "2026-03-23",
+    "activityTotal90d": 30,
     "contributors": [
       {
         "name": "Birat",
@@ -220,7 +412,7 @@
       },
       {
         "name": "ToniBirat7",
-        "commits": 29
+        "commits": 30
       },
       {
         "name": "Birat Gautam",
@@ -228,6 +420,1582 @@
       }
     ]
   },
-  "generatedAt": "2026-06-10T11:01:09.999304+00:00",
-  "generatedBy": "pulse-deep@0.1.0"
+  "generatedAt": "2026-06-20T05:45:45.185199+00:00",
+  "generatedBy": "pulse-autosync@0.1.0",
+  "commitGraph": [
+    {
+      "sha": "f623bdf",
+      "parents": [
+        "1faaf99"
+      ],
+      "refs": [
+        "master"
+      ],
+      "author": "ToniBirat7",
+      "subject": "chore(pulse): commit tracked .pulse/ project state",
+      "at": "2026-06-10T18:15:08+00:00"
+    },
+    {
+      "sha": "1faaf99",
+      "parents": [
+        "7b58099"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "chore(pulse): track .pulse/ project state",
+      "at": "2026-06-10T09:31:39+00:00"
+    },
+    {
+      "sha": "7b58099",
+      "parents": [
+        "d1b7a88"
+      ],
+      "refs": [
+        "origin/master",
+        "origin/HEAD"
+      ],
+      "author": "ToniBirat7",
+      "subject": "fix: ship trained model artifacts so face rec + grade predict work in prod",
+      "at": "2026-06-01T04:58:27+00:00"
+    },
+    {
+      "sha": "d1b7a88",
+      "parents": [
+        "0a4876f"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: register teacher via JSON+base64 — multipart body lost in nginx proxy",
+      "at": "2026-05-31T17:35:40+00:00"
+    },
+    {
+      "sha": "0a4876f",
+      "parents": [
+        "6379479"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: allow secondary_number to be NULL so multiple teachers can omit it",
+      "at": "2026-05-31T17:16:47+00:00"
+    },
+    {
+      "sha": "6379479",
+      "parents": [
+        "6ed1a88"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: add X-Forwarded-Proto https to server-side Django fetches",
+      "at": "2026-05-31T17:05:44+00:00"
+    },
+    {
+      "sha": "6ed1a88",
+      "parents": [
+        "2651c15"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: hardcode X-Forwarded-Proto https in BCU nginx",
+      "at": "2026-05-31T11:08:23+00:00"
+    },
+    {
+      "sha": "2651c15",
+      "parents": [
+        "a1bd1e6"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: bind nginx to localhost:8080 — avoid conflict with system nginx on port 80",
+      "at": "2026-05-30T18:33:47+00:00"
+    },
+    {
+      "sha": "a1bd1e6",
+      "parents": [
+        "b1f9015"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: add production deploy config for bcuams.biratcodes.dev",
+      "at": "2026-05-30T18:19:25+00:00"
+    },
+    {
+      "sha": "b1f9015",
+      "parents": [
+        "ad8416a"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "perf: cut Docker RAM footprint (idle Daphne 544MB -> 94MB)",
+      "at": "2026-05-30T18:08:20+00:00"
+    },
+    {
+      "sha": "ad8416a",
+      "parents": [
+        "19e9053"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: seed admin + trained student roster on container startup",
+      "at": "2026-05-30T18:08:20+00:00"
+    },
+    {
+      "sha": "19e9053",
+      "parents": [
+        "c28ce35"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "chore: remove GitHub Copilot instructions file",
+      "at": "2026-05-30T17:17:43+00:00"
+    },
+    {
+      "sha": "c28ce35",
+      "parents": [
+        "b6fa4c7"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: BCU navy+gold brand reskin + login redesign",
+      "at": "2026-05-30T17:17:38+00:00"
+    },
+    {
+      "sha": "b6fa4c7",
+      "parents": [
+        "dd0e736"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: browser-camera face attendance (drop server-side webcam)",
+      "at": "2026-05-30T17:17:25+00:00"
+    },
+    {
+      "sha": "dd0e736",
+      "parents": [
+        "afd1bec"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: rebuild frontend from scratch — Modern SaaS design system",
+      "at": "2026-05-30T13:34:55+00:00"
+    },
+    {
+      "sha": "afd1bec",
+      "parents": [
+        "3a727c8"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "redesign: complete UI overhaul across all pages",
+      "at": "2026-05-30T12:50:02+00:00"
+    },
+    {
+      "sha": "3a727c8",
+      "parents": [
+        "cda5c92"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: restore all custom Tailwind classes by migrating to v4 syntax",
+      "at": "2026-05-30T12:26:48+00:00"
+    },
+    {
+      "sha": "cda5c92",
+      "parents": [
+        "d779991"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: add 'django' to ALLOWED_HOSTS — middleware auth was silently failing",
+      "at": "2026-05-30T12:15:31+00:00"
+    },
+    {
+      "sha": "d779991",
+      "parents": [
+        "78d911c"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "redesign: premium split-screen login page",
+      "at": "2026-05-30T11:40:24+00:00"
+    },
+    {
+      "sha": "78d911c",
+      "parents": [
+        "0517463"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: resolve Docker build and runtime issues found during testing",
+      "at": "2026-05-30T11:28:49+00:00"
+    },
+    {
+      "sha": "0517463",
+      "parents": [
+        "0360d07"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "refactor: replace debug prints with structured logging in consumers",
+      "at": "2026-05-30T10:34:00+00:00"
+    },
+    {
+      "sha": "0360d07",
+      "parents": [
+        "c8539c4"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: dockerize full stack with minimal RAM footprint",
+      "at": "2026-05-30T10:28:13+00:00"
+    },
+    {
+      "sha": "c8539c4",
+      "parents": [
+        "11a225c"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "ci: add GitHub Actions deployment pipeline for BCU AMS",
+      "at": "2026-05-18T10:43:34+00:00"
+    },
+    {
+      "sha": "11a225c",
+      "parents": [
+        "92d44cb"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "docs: rewrite README for current architecture and add Azure deployment guide",
+      "at": "2026-05-18T10:08:58+00:00"
+    },
+    {
+      "sha": "92d44cb",
+      "parents": [
+        "765ebd0"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "docs: add robustness audit and improvement roadmap",
+      "at": "2026-05-06T05:50:57+00:00"
+    },
+    {
+      "sha": "765ebd0",
+      "parents": [
+        "665ae49"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: add input validation for CRUD endpoints (security hardening)",
+      "at": "2026-05-06T05:49:02+00:00"
+    },
+    {
+      "sha": "665ae49",
+      "parents": [
+        "8955f94"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: replace @login_required with api_login_required to return JSON 401",
+      "at": "2026-05-06T05:32:40+00:00"
+    },
+    {
+      "sha": "8955f94",
+      "parents": [
+        "800428a"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: production-ready restructure with Next.js frontend and hardened Django backend",
+      "at": "2026-05-06T02:29:24+00:00"
+    },
+    {
+      "sha": "800428a",
+      "parents": [
+        "07ccb36"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: AMS_CV revamped frontend and backend",
+      "at": "2026-05-06T02:28:04+00:00"
+    },
+    {
+      "sha": "07ccb36",
+      "parents": [
+        "6ceeb83"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: fixed the codebase [copilot]",
+      "at": "2026-05-04T15:46:29+00:00"
+    },
+    {
+      "sha": "73ad9aa",
+      "parents": [
+        "4bb4738"
+      ],
+      "refs": [
+        "backup-before-reset-20260504-131334"
+      ],
+      "author": "ToniBirat7",
+      "subject": "fix: login redirect, teacher form, validator mismatches, backend field names, attendance security",
+      "at": "2026-04-07T05:51:47+00:00"
+    },
+    {
+      "sha": "4bb4738",
+      "parents": [
+        "0bb93e5"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: remove invalid script_stop param from ssh-action",
+      "at": "2026-04-07T04:57:43+00:00"
+    },
+    {
+      "sha": "0bb93e5",
+      "parents": [
+        "1c2f8cb"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: remove invalid script_stop param from ssh-action",
+      "at": "2026-04-06T18:02:40+00:00"
+    },
+    {
+      "sha": "1c2f8cb",
+      "parents": [
+        "b5aaa02"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: nginx reverse proxy, fix production settings",
+      "at": "2026-04-06T17:56:51+00:00"
+    },
+    {
+      "sha": "b5aaa02",
+      "parents": [
+        "25387c7"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: use tailscale CLI install instead of action",
+      "at": "2026-04-06T17:37:48+00:00"
+    },
+    {
+      "sha": "25387c7",
+      "parents": [
+        "8534209"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: remove Tailscale, deploy via   direct SSH",
+      "at": "2026-04-06T17:19:14+00:00"
+    },
+    {
+      "sha": "8534209",
+      "parents": [
+        "2c25019"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: upgrade tailscale action to   v3",
+      "at": "2026-04-06T17:12:15+00:00"
+    },
+    {
+      "sha": "2c25019",
+      "parents": [
+        "63d79f6"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: add tag:ci to Tailscale OAuth",
+      "at": "2026-04-06T16:59:52+00:00"
+    },
+    {
+      "sha": "63d79f6",
+      "parents": [
+        "852005a"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "fix: update GHCR paths to match renamed repo",
+      "at": "2026-04-06T16:39:04+00:00"
+    },
+    {
+      "sha": "852005a",
+      "parents": [
+        "d4b52b9"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: CI/CD test",
+      "at": "2026-04-06T16:31:49+00:00"
+    },
+    {
+      "sha": "d4b52b9",
+      "parents": [
+        "f790b9d"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "docs: dummy data done, [Model Selection and Best Runtime Research]",
+      "at": "2026-04-06T10:41:44+00:00"
+    },
+    {
+      "sha": "f790b9d",
+      "parents": [
+        "cefdc1e"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "feat: microservices",
+      "at": "2026-04-05T10:44:56+00:00"
+    },
+    {
+      "sha": "cefdc1e",
+      "parents": [
+        "ed5e71b"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "vupdate: microservices",
+      "at": "2026-04-05T08:36:02+00:00"
+    },
+    {
+      "sha": "ed5e71b",
+      "parents": [
+        "0a35791"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "vupdate: microservices",
+      "at": "2026-04-05T08:28:10+00:00"
+    },
+    {
+      "sha": "0a35791",
+      "parents": [
+        "655f67b"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "docs: latext docs added",
+      "at": "2026-04-01T10:06:43+00:00"
+    },
+    {
+      "sha": "655f67b",
+      "parents": [
+        "6ceeb83"
+      ],
+      "refs": [],
+      "author": "ToniBirat7",
+      "subject": "chore: tested again",
+      "at": "2026-03-22T08:07:53+00:00"
+    },
+    {
+      "sha": "7c3e8f0",
+      "parents": [
+        "3d3032a"
+      ],
+      "refs": [
+        "rollback-may31"
+      ],
+      "author": "ToniBirat7",
+      "subject": "update",
+      "at": "2025-12-02T17:11:22+00:00"
+    },
+    {
+      "sha": "425bf83",
+      "parents": [
+        "3d3032a"
+      ],
+      "refs": [
+        "origin/sovit"
+      ],
+      "author": "ToniBirat7",
+      "subject": "summer class ams",
+      "at": "2025-12-02T15:23:16+00:00"
+    },
+    {
+      "sha": "6ceeb83",
+      "parents": [
+        "1ccbbd7"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "update:new working",
+      "at": "2025-12-02T13:48:15+00:00"
+    },
+    {
+      "sha": "3d3032a",
+      "parents": [
+        "bec0dae"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "update: revamped started",
+      "at": "2025-11-16T04:43:14+00:00"
+    },
+    {
+      "sha": "bec0dae",
+      "parents": [
+        "e098819"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Added Hridesh Image Trained",
+      "at": "2025-05-31T09:17:49+00:00"
+    },
+    {
+      "sha": "e098819",
+      "parents": [
+        "1ccbbd7"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Added Hridesh Image",
+      "at": "2025-05-31T08:43:49+00:00"
+    },
+    {
+      "sha": "1ccbbd7",
+      "parents": [
+        "6857f03"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Final Completed",
+      "at": "2025-04-22T08:06:45+00:00"
+    },
+    {
+      "sha": "6857f03",
+      "parents": [
+        "de5c6f1"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Final Complete",
+      "at": "2025-04-22T07:59:56+00:00"
+    },
+    {
+      "sha": "de5c6f1",
+      "parents": [
+        "19190e3"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Face Recognition Model Completed with Dummy Celeb Photos",
+      "at": "2025-04-22T07:10:29+00:00"
+    },
+    {
+      "sha": "19190e3",
+      "parents": [
+        "2b1620c"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Face Recognition Model Completed with Dummy Celeb Photos",
+      "at": "2025-04-13T04:24:44+00:00"
+    },
+    {
+      "sha": "2b1620c",
+      "parents": [
+        "cd361d0"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Face Recognition Model Completed with Dummy Celeb Photos",
+      "at": "2025-04-13T03:25:17+00:00"
+    },
+    {
+      "sha": "cd361d0",
+      "parents": [
+        "0dab84b"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Face Recognition Model Completed with Dummy Celeb Photos",
+      "at": "2025-04-12T17:42:06+00:00"
+    },
+    {
+      "sha": "0dab84b",
+      "parents": [
+        "adce7d1"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Face Recognition Model Completed with Dummy Celeb Photos",
+      "at": "2025-04-12T17:40:02+00:00"
+    },
+    {
+      "sha": "adce7d1",
+      "parents": [
+        "ce458cd"
+      ],
+      "refs": [],
+      "author": "Birat",
+      "subject": "Face Recognition Model Completed with Dummy Celeb Photos",
+      "at": "2025-04-12T17:38:42+00:00"
+    }
+  ],
+  "pipeline": {
+    "graph": {
+      "nodes": [
+        {
+          "id": "dev-backend",
+          "label": "python manage.py runserver (Daphne)",
+          "kind": "build"
+        },
+        {
+          "id": "dev-frontend",
+          "label": "npm run dev (Next.js :3000)",
+          "kind": "build"
+        },
+        {
+          "id": "lint",
+          "label": "eslint (frontend)",
+          "kind": "test"
+        },
+        {
+          "id": "tsc",
+          "label": "tsc --noEmit",
+          "kind": "test"
+        },
+        {
+          "id": "django-check",
+          "label": "manage.py check --deploy",
+          "kind": "test"
+        },
+        {
+          "id": "docker-build",
+          "label": "docker compose build",
+          "kind": "build"
+        },
+        {
+          "id": "docker-up",
+          "label": "docker compose up -d",
+          "kind": "deploy"
+        },
+        {
+          "id": "prune",
+          "label": "docker image prune",
+          "kind": "deploy"
+        },
+        {
+          "id": "git-push",
+          "label": "git push origin master",
+          "kind": "ci"
+        },
+        {
+          "id": "gh-actions",
+          "label": "GitHub Actions deploy.yml",
+          "kind": "ci"
+        }
+      ],
+      "edges": [
+        {
+          "from": "dev-backend",
+          "to": "dev-frontend",
+          "label": "local dev (parallel)"
+        },
+        {
+          "from": "dev-frontend",
+          "to": "lint",
+          "label": "code quality"
+        },
+        {
+          "from": "lint",
+          "to": "tsc",
+          "label": "type check"
+        },
+        {
+          "from": "tsc",
+          "to": "django-check",
+          "label": "deploy check"
+        },
+        {
+          "from": "django-check",
+          "to": "git-push",
+          "label": "push to master"
+        },
+        {
+          "from": "git-push",
+          "to": "gh-actions",
+          "label": "triggers on push"
+        },
+        {
+          "from": "gh-actions",
+          "to": "docker-build",
+          "label": "SSH via Tailscale"
+        },
+        {
+          "from": "docker-build",
+          "to": "docker-up",
+          "label": "compose up -d"
+        },
+        {
+          "from": "docker-up",
+          "to": "prune",
+          "label": "cleanup old images"
+        }
+      ]
+    }
+  },
+  "knowledgeGraph": {
+    "nodes": [
+      {
+        "id": "nextjs-app",
+        "title": "Next.js 15 App",
+        "type": "service",
+        "tags": [
+          "frontend",
+          "react19",
+          "typescript"
+        ]
+      },
+      {
+        "id": "django-backend",
+        "title": "Django 5 Backend",
+        "type": "service",
+        "tags": [
+          "python",
+          "asgi",
+          "daphne"
+        ]
+      },
+      {
+        "id": "accounts-app",
+        "title": "apps.accounts Django app",
+        "type": "module",
+        "tags": [
+          "auth",
+          "admin",
+          "crud"
+        ]
+      },
+      {
+        "id": "attendance-app",
+        "title": "apps.attendance Django app",
+        "type": "module",
+        "tags": [
+          "teacher",
+          "attendance"
+        ]
+      },
+      {
+        "id": "accounts-models",
+        "title": "accounts/models.py",
+        "type": "model",
+        "tags": [
+          "django",
+          "orm"
+        ]
+      },
+      {
+        "id": "accounts-views",
+        "title": "accounts/views.py (30+ endpoints)",
+        "type": "module",
+        "tags": [
+          "api",
+          "json"
+        ]
+      },
+      {
+        "id": "accounts-urls",
+        "title": "accounts/urls.py",
+        "type": "config",
+        "tags": [
+          "routing"
+        ]
+      },
+      {
+        "id": "accounts-routing",
+        "title": "accounts/routing.py",
+        "type": "config",
+        "tags": [
+          "websocket"
+        ]
+      },
+      {
+        "id": "attendance-views",
+        "title": "attendance/views.py",
+        "type": "module",
+        "tags": [
+          "teacher",
+          "excel"
+        ]
+      },
+      {
+        "id": "attendance-urls",
+        "title": "attendance/urls.py",
+        "type": "config",
+        "tags": [
+          "routing"
+        ]
+      },
+      {
+        "id": "ws-consumer",
+        "title": "VideoAttendanceConsumer",
+        "type": "service",
+        "tags": [
+          "websocket",
+          "asyncio",
+          "channels"
+        ]
+      },
+      {
+        "id": "face-rec-check",
+        "title": "services/face_recognition/check.py",
+        "type": "service",
+        "tags": [
+          "ml",
+          "cv",
+          "pytorch"
+        ]
+      },
+      {
+        "id": "face-rec-train",
+        "title": "face_recognition/model_train.py",
+        "type": "job",
+        "tags": [
+          "ml",
+          "offline"
+        ]
+      },
+      {
+        "id": "face-rec-dataset",
+        "title": "face_recognition/dataset_maker.py",
+        "type": "job",
+        "tags": [
+          "ml",
+          "mtcnn",
+          "offline"
+        ]
+      },
+      {
+        "id": "face-embeddings",
+        "title": "embeddings.pkl",
+        "type": "datastore",
+        "tags": [
+          "ml",
+          "face-vectors"
+        ]
+      },
+      {
+        "id": "grade-classifier",
+        "title": "ml_models/grade_classifier.pkl",
+        "type": "model",
+        "tags": [
+          "sklearn",
+          "prediction"
+        ]
+      },
+      {
+        "id": "config-settings",
+        "title": "config/settings.py",
+        "type": "config",
+        "tags": [
+          "django",
+          "decouple"
+        ]
+      },
+      {
+        "id": "config-asgi",
+        "title": "config/asgi.py",
+        "type": "config",
+        "tags": [
+          "channels",
+          "websocket"
+        ]
+      },
+      {
+        "id": "config-urls",
+        "title": "config/urls.py",
+        "type": "config",
+        "tags": [
+          "routing"
+        ]
+      },
+      {
+        "id": "model-teacher",
+        "title": "Teacher model",
+        "type": "model",
+        "tags": [
+          "db",
+          "auth"
+        ]
+      },
+      {
+        "id": "model-student",
+        "title": "Student model",
+        "type": "model",
+        "tags": [
+          "db"
+        ]
+      },
+      {
+        "id": "model-course",
+        "title": "Course model",
+        "type": "model",
+        "tags": [
+          "db"
+        ]
+      },
+      {
+        "id": "model-studentclass",
+        "title": "StudentClass model (enrollment)",
+        "type": "model",
+        "tags": [
+          "db",
+          "junction"
+        ]
+      },
+      {
+        "id": "model-attendance",
+        "title": "Attendance model",
+        "type": "model",
+        "tags": [
+          "db"
+        ]
+      },
+      {
+        "id": "sqlite-db",
+        "title": "SQLite / PostgreSQL Database",
+        "type": "datastore",
+        "tags": [
+          "db"
+        ]
+      },
+      {
+        "id": "redis-cache",
+        "title": "Redis (optional channel layer)",
+        "type": "datastore",
+        "tags": [
+          "cache",
+          "channels"
+        ]
+      },
+      {
+        "id": "frontend-api",
+        "title": "frontend/src/lib/api.ts",
+        "type": "module",
+        "tags": [
+          "http",
+          "fetch",
+          "typescript"
+        ]
+      },
+      {
+        "id": "frontend-middleware",
+        "title": "frontend/src/middleware.ts",
+        "type": "module",
+        "tags": [
+          "auth",
+          "nextjs",
+          "edge"
+        ]
+      },
+      {
+        "id": "frontend-types",
+        "title": "frontend/src/types/api.ts",
+        "type": "module",
+        "tags": [
+          "typescript",
+          "interfaces"
+        ]
+      },
+      {
+        "id": "use-websocket",
+        "title": "useWebSocket hook",
+        "type": "module",
+        "tags": [
+          "react",
+          "websocket",
+          "browser-camera"
+        ]
+      },
+      {
+        "id": "frontend-admin-pages",
+        "title": "Admin pages (/admin/*)",
+        "type": "ui",
+        "tags": [
+          "nextjs",
+          "crud",
+          "dashboard"
+        ]
+      },
+      {
+        "id": "frontend-teacher-pages",
+        "title": "Teacher pages (/teacher/*)",
+        "type": "ui",
+        "tags": [
+          "nextjs",
+          "attendance",
+          "webcam"
+        ]
+      },
+      {
+        "id": "frontend-login",
+        "title": "Login page (/)",
+        "type": "ui",
+        "tags": [
+          "nextjs",
+          "auth"
+        ]
+      },
+      {
+        "id": "ui-components",
+        "title": "UI Component library (src/components/ui/)",
+        "type": "library",
+        "tags": [
+          "react",
+          "tailwind",
+          "framer-motion"
+        ]
+      },
+      {
+        "id": "admin-layout",
+        "title": "AdminLayout + AdminSidebar",
+        "type": "ui",
+        "tags": [
+          "react",
+          "layout"
+        ]
+      },
+      {
+        "id": "teacher-layout",
+        "title": "TeacherLayout + TeacherNav",
+        "type": "ui",
+        "tags": [
+          "react",
+          "layout"
+        ]
+      },
+      {
+        "id": "theme-provider",
+        "title": "ThemeProvider (dark/light mode)",
+        "type": "module",
+        "tags": [
+          "react",
+          "next-themes"
+        ]
+      },
+      {
+        "id": "next-config",
+        "title": "next.config.ts",
+        "type": "config",
+        "tags": [
+          "nextjs",
+          "proxy",
+          "rewrites"
+        ]
+      },
+      {
+        "id": "nginx-conf",
+        "title": "nginx/nginx.conf",
+        "type": "config",
+        "tags": [
+          "reverse-proxy",
+          "websocket"
+        ]
+      },
+      {
+        "id": "docker-compose",
+        "title": "docker-compose.yml",
+        "type": "config",
+        "tags": [
+          "docker",
+          "volumes"
+        ]
+      },
+      {
+        "id": "docker-compose-prod",
+        "title": "docker-compose.prod.yml",
+        "type": "config",
+        "tags": [
+          "docker",
+          "production",
+          "resource-limits"
+        ]
+      },
+      {
+        "id": "backend-dockerfile",
+        "title": "backend/Dockerfile",
+        "type": "config",
+        "tags": [
+          "docker"
+        ]
+      },
+      {
+        "id": "frontend-dockerfile",
+        "title": "frontend/Dockerfile",
+        "type": "config",
+        "tags": [
+          "docker",
+          "standalone"
+        ]
+      },
+      {
+        "id": "entrypoint-sh",
+        "title": "backend/entrypoint.sh",
+        "type": "job",
+        "tags": [
+          "docker",
+          "seed",
+          "migrate"
+        ]
+      },
+      {
+        "id": "seed-command",
+        "title": "manage commands: seed + runserver",
+        "type": "module",
+        "tags": [
+          "django",
+          "management"
+        ]
+      },
+      {
+        "id": "github-workflow",
+        "title": ".github/workflows/deploy.yml",
+        "type": "config",
+        "tags": [
+          "ci",
+          "tailscale",
+          "ssh"
+        ]
+      },
+      {
+        "id": "mtcnn-model",
+        "title": "MTCNN (facenet-pytorch)",
+        "type": "external",
+        "tags": [
+          "ml",
+          "face-detection"
+        ]
+      },
+      {
+        "id": "inceptionresnet",
+        "title": "InceptionResnetV1 (CASIA-WebFace)",
+        "type": "external",
+        "tags": [
+          "ml",
+          "face-embedding"
+        ]
+      },
+      {
+        "id": "excel-export",
+        "title": "Excel report via openpyxl",
+        "type": "module",
+        "tags": [
+          "reporting",
+          "xlsx"
+        ]
+      },
+      {
+        "id": "chart-js",
+        "title": "Chart.js / react-chartjs-2",
+        "type": "library",
+        "tags": [
+          "frontend",
+          "charts"
+        ]
+      },
+      {
+        "id": "tailwindcss",
+        "title": "Tailwind CSS v4",
+        "type": "library",
+        "tags": [
+          "frontend",
+          "styling"
+        ]
+      },
+      {
+        "id": "framer-motion",
+        "title": "framer-motion",
+        "type": "library",
+        "tags": [
+          "frontend",
+          "animation"
+        ]
+      },
+      {
+        "id": "react-hook-form",
+        "title": "react-hook-form + zod",
+        "type": "library",
+        "tags": [
+          "frontend",
+          "forms",
+          "validation"
+        ]
+      },
+      {
+        "id": "api-proxy-ts",
+        "title": "frontend/src/lib/api-proxy.ts",
+        "type": "module",
+        "tags": [
+          "server-side",
+          "proxy"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "nextjs-app",
+        "target": "frontend-api",
+        "predicate": "uses"
+      },
+      {
+        "source": "nextjs-app",
+        "target": "frontend-middleware",
+        "predicate": "uses"
+      },
+      {
+        "source": "nextjs-app",
+        "target": "next-config",
+        "predicate": "configures"
+      },
+      {
+        "source": "nextjs-app",
+        "target": "frontend-admin-pages",
+        "predicate": "contains"
+      },
+      {
+        "source": "nextjs-app",
+        "target": "frontend-teacher-pages",
+        "predicate": "contains"
+      },
+      {
+        "source": "nextjs-app",
+        "target": "frontend-login",
+        "predicate": "contains"
+      },
+      {
+        "source": "frontend-admin-pages",
+        "target": "ui-components",
+        "predicate": "uses"
+      },
+      {
+        "source": "frontend-teacher-pages",
+        "target": "ui-components",
+        "predicate": "uses"
+      },
+      {
+        "source": "frontend-teacher-pages",
+        "target": "use-websocket",
+        "predicate": "uses"
+      },
+      {
+        "source": "frontend-teacher-pages",
+        "target": "chart-js",
+        "predicate": "uses"
+      },
+      {
+        "source": "frontend-admin-pages",
+        "target": "react-hook-form",
+        "predicate": "uses"
+      },
+      {
+        "source": "ui-components",
+        "target": "tailwindcss",
+        "predicate": "uses"
+      },
+      {
+        "source": "ui-components",
+        "target": "framer-motion",
+        "predicate": "uses"
+      },
+      {
+        "source": "frontend-api",
+        "target": "frontend-types",
+        "predicate": "uses"
+      },
+      {
+        "source": "use-websocket",
+        "target": "ws-consumer",
+        "predicate": "calls"
+      },
+      {
+        "source": "frontend-middleware",
+        "target": "django-backend",
+        "predicate": "calls"
+      },
+      {
+        "source": "next-config",
+        "target": "django-backend",
+        "predicate": "configures"
+      },
+      {
+        "source": "django-backend",
+        "target": "accounts-app",
+        "predicate": "contains"
+      },
+      {
+        "source": "django-backend",
+        "target": "attendance-app",
+        "predicate": "contains"
+      },
+      {
+        "source": "django-backend",
+        "target": "config-settings",
+        "predicate": "configures"
+      },
+      {
+        "source": "django-backend",
+        "target": "config-asgi",
+        "predicate": "configures"
+      },
+      {
+        "source": "config-asgi",
+        "target": "ws-consumer",
+        "predicate": "configures"
+      },
+      {
+        "source": "config-urls",
+        "target": "accounts-app",
+        "predicate": "configures"
+      },
+      {
+        "source": "config-urls",
+        "target": "attendance-app",
+        "predicate": "configures"
+      },
+      {
+        "source": "accounts-app",
+        "target": "accounts-views",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-app",
+        "target": "accounts-models",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-app",
+        "target": "accounts-urls",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-app",
+        "target": "accounts-routing",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-app",
+        "target": "ws-consumer",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-views",
+        "target": "model-teacher",
+        "predicate": "uses"
+      },
+      {
+        "source": "accounts-views",
+        "target": "model-student",
+        "predicate": "uses"
+      },
+      {
+        "source": "accounts-views",
+        "target": "model-course",
+        "predicate": "uses"
+      },
+      {
+        "source": "accounts-views",
+        "target": "model-studentclass",
+        "predicate": "uses"
+      },
+      {
+        "source": "accounts-views",
+        "target": "model-attendance",
+        "predicate": "uses"
+      },
+      {
+        "source": "accounts-views",
+        "target": "grade-classifier",
+        "predicate": "uses"
+      },
+      {
+        "source": "attendance-app",
+        "target": "attendance-views",
+        "predicate": "contains"
+      },
+      {
+        "source": "attendance-views",
+        "target": "model-course",
+        "predicate": "uses"
+      },
+      {
+        "source": "attendance-views",
+        "target": "model-studentclass",
+        "predicate": "uses"
+      },
+      {
+        "source": "attendance-views",
+        "target": "model-attendance",
+        "predicate": "uses"
+      },
+      {
+        "source": "attendance-views",
+        "target": "excel-export",
+        "predicate": "uses"
+      },
+      {
+        "source": "ws-consumer",
+        "target": "face-rec-check",
+        "predicate": "calls"
+      },
+      {
+        "source": "ws-consumer",
+        "target": "model-studentclass",
+        "predicate": "calls"
+      },
+      {
+        "source": "ws-consumer",
+        "target": "redis-cache",
+        "predicate": "uses"
+      },
+      {
+        "source": "face-rec-check",
+        "target": "mtcnn-model",
+        "predicate": "uses"
+      },
+      {
+        "source": "face-rec-check",
+        "target": "inceptionresnet",
+        "predicate": "uses"
+      },
+      {
+        "source": "face-rec-check",
+        "target": "face-embeddings",
+        "predicate": "uses"
+      },
+      {
+        "source": "face-rec-train",
+        "target": "face-embeddings",
+        "predicate": "stores"
+      },
+      {
+        "source": "face-rec-dataset",
+        "target": "mtcnn-model",
+        "predicate": "uses"
+      },
+      {
+        "source": "accounts-models",
+        "target": "model-teacher",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-models",
+        "target": "model-student",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-models",
+        "target": "model-course",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-models",
+        "target": "model-studentclass",
+        "predicate": "contains"
+      },
+      {
+        "source": "accounts-models",
+        "target": "model-attendance",
+        "predicate": "contains"
+      },
+      {
+        "source": "model-teacher",
+        "target": "sqlite-db",
+        "predicate": "stores"
+      },
+      {
+        "source": "model-student",
+        "target": "sqlite-db",
+        "predicate": "stores"
+      },
+      {
+        "source": "model-course",
+        "target": "sqlite-db",
+        "predicate": "stores"
+      },
+      {
+        "source": "model-studentclass",
+        "target": "sqlite-db",
+        "predicate": "stores"
+      },
+      {
+        "source": "model-attendance",
+        "target": "sqlite-db",
+        "predicate": "stores"
+      },
+      {
+        "source": "model-course",
+        "target": "model-teacher",
+        "predicate": "relates_to"
+      },
+      {
+        "source": "model-studentclass",
+        "target": "model-course",
+        "predicate": "relates_to"
+      },
+      {
+        "source": "model-studentclass",
+        "target": "model-student",
+        "predicate": "relates_to"
+      },
+      {
+        "source": "model-attendance",
+        "target": "model-student",
+        "predicate": "relates_to"
+      },
+      {
+        "source": "model-attendance",
+        "target": "model-course",
+        "predicate": "relates_to"
+      },
+      {
+        "source": "nginx-conf",
+        "target": "django-backend",
+        "predicate": "configures"
+      },
+      {
+        "source": "nginx-conf",
+        "target": "nextjs-app",
+        "predicate": "configures"
+      },
+      {
+        "source": "docker-compose",
+        "target": "django-backend",
+        "predicate": "configures"
+      },
+      {
+        "source": "docker-compose",
+        "target": "nextjs-app",
+        "predicate": "configures"
+      },
+      {
+        "source": "docker-compose",
+        "target": "nginx-conf",
+        "predicate": "configures"
+      },
+      {
+        "source": "docker-compose-prod",
+        "target": "docker-compose",
+        "predicate": "extends"
+      },
+      {
+        "source": "github-workflow",
+        "target": "docker-compose",
+        "predicate": "uses"
+      },
+      {
+        "source": "entrypoint-sh",
+        "target": "seed-command",
+        "predicate": "calls"
+      },
+      {
+        "source": "config-settings",
+        "target": "redis-cache",
+        "predicate": "configures"
+      }
+    ]
+  }
 }
